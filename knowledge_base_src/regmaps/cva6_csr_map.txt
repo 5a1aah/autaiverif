@@ -1,0 +1,56 @@
+CVA6 Relevant Control and Status Registers (CSRs) - Snippet
+
+This is not an exhaustive list but includes commonly accessed CSRs.
+Addresses are standard RISC-V CSR addresses.
+
+Machine Information Registers:
+- mvendorid (0xF11): Vendor ID. Read-only.
+- marchid   (0xF12): Architecture ID. Read-only.
+- mimpid    (0xF13): Implementation ID. Read-only.
+- mhartid   (0xF14): Hardware thread ID. Read-only. Machine mode.
+
+Machine Trap Setup:
+- mstatus   (0x300): Machine status register. (Controls global interrupt enable, privilege levels, etc.)
+- misa      (0x301): ISA and extensions.
+- medeleg   (0x302): Machine exception delegation register.
+- mideleg   (0x303): Machine interrupt delegation register.
+- mie       (0x304): Machine interrupt-enable register. (Controls enabling specific machine-level interrupts: MSIE, MTIE, MEIE)
+- mtvec     (0x305): Machine trap-handler base address.
+- mcounteren (0x306): Machine counter enable.
+
+Machine Trap Handling:
+- mscratch  (0x340): Scratch register for machine trap handlers.
+- mepc      (0x341): Machine exception program counter. (Stores PC at time of trap)
+- mcause    (0x342): Machine trap cause. (Indicates reason for trap)
+- mtval     (0x343): Machine bad address or instruction. (Stores faulting address or instruction)
+- mip       (0x344): Machine interrupt pending. (Indicates pending machine-level interrupts: MSIP, MTIP, MEIP)
+
+Machine Timers (standard RISC-V):
+- mcycle    (0xB00): Machine cycle counter. (Privileged spec says 0xB00 for mcycle, 0xC00 for RV32 cycle)
+- minstret  (0xB02): Machine instructions-retired counter.
+- time      (0xC01): Timer (typically connected to mtime, if platform provides it directly readable for U-mode via rdtime).
+- mtime     (memory-mapped): Platform-specific memory-mapped register holding current time.
+- mtimecmp  (memory-mapped): Platform-specific memory-mapped register for setting timer interrupt compare value.
+
+Supervisor Trap Setup:
+- sstatus   (0x100): Supervisor status register. (Subset of mstatus)
+- sie       (0x104): Supervisor interrupt-enable register.
+- stvec     (0x105): Supervisor trap handler base address.
+
+Supervisor Trap Handling:
+- sscratch  (0x140): Scratch register for supervisor trap handlers.
+- sepc      (0x141): Supervisor exception program counter.
+- scause    (0x142): Supervisor trap cause.
+- stval     (0x143): Supervisor bad address or instruction.
+- sip       (0x144): Supervisor interrupt pending.
+
+Supervisor Memory Management:
+- satp      (0x180): Supervisor address translation and protection. (Page table base address, mode)
+
+User-Level CSRs (Counters/Timers - access controlled by mcounteren/scounteren):
+- cycle     (0xC00): Cycle counter (User-mode alias for mcycle, if enabled).
+- time      (0xC01): Timer (User-mode alias).
+- instret   (0xC02): Instructions-retired counter (User-mode alias for minstret, if enabled).
+
+Note: Access to some CSRs may depend on the current privilege level and ISA extensions implemented/enabled (e.g., 'U' extension for user-mode counters).
+The actual implementation of counters like mcycle and minstret can vary; some CVA6 configurations might implement them as 64-bit, while others might have 32-bit versions (mcycleh, minstreth).

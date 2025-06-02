@@ -1,0 +1,32 @@
+CVA6 Core Specification Snippet
+
+Overview:
+CVA6 is an open-source, 6-stage, single-issue, in-order CPU core implementing the 64-bit RISC-V instruction set (RV64GC). It is designed to be highly configurable and suitable for a range of applications from embedded systems to research platforms. The CVA6 project is part of the OpenHW Group.
+
+Key Features:
+- RV64GC ISA (IMAFDCH_Zicsr_Zifencei)
+- 6-stage pipeline: Fetch1, Fetch2, Decode, Issue, Execute, Commit
+- Branch Prediction: Branch Target Buffer (BTB), Branch History Table (BHT), Return Address Stack (RAS)
+- Memory Management Unit (MMU): Sv39 page-based virtual memory
+- Privileged Modes: Machine (M), Supervisor (S), User (U)
+- Instruction and Data Caches: Configurable size, associativity, and block size. Typically write-back, write-allocate.
+- AXI4/AXI4-Lite Interfaces: For instruction fetch, data access, and peripheral communication.
+- Debug Support: RISC-V Debug Specification v0.13 compatible.
+- Interrupts: Standard RISC-V local interrupts (software, timer, external) and platform-level interrupt controller (PLIC) support.
+
+Pipeline Stages:
+1.  Fetch1 (F1): PC generation, initial branch prediction.
+2.  Fetch2 (F2): Instruction cache access, instruction alignment.
+3.  Decode (ID): Instruction decoding, register file read preparation.
+4.  Issue (IS): Operand fetching, checks for hazards (simplified due to in-order nature).
+5.  Execute (EX): ALU operations, memory address calculation, branch resolution.
+6.  Commit (WB): Write back results to register file, handle exceptions and interrupts.
+
+Memory System:
+The CVA6 core typically features separate instruction and data caches (I-cache and D-cache).
+- I-Cache: Fetches instructions for the pipeline.
+- D-Cache: Handles load and store operations from the CPU. Cache coherence mechanisms might be required in multi-core systems, often managed externally or via simplified schemes.
+- Access to main memory and peripherals is usually via an AXI4-compatible bus interface.
+
+Interrupt Handling:
+CVA6 supports standard RISC-V interrupt mechanisms. Machine Timer Interrupts (MTIP), Machine Software Interrupts (MSIP), and Machine External Interrupts (MEIP) are handled via the `mcause`, `mepc`, `mtval`, and `mstatus` CSRs. Supervisor level interrupts are similarly handled with `scause`, `sepc`, etc. External interrupts are typically routed through a Platform-Level Interrupt Controller (PLIC).

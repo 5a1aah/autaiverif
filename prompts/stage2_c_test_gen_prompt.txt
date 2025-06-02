@@ -1,0 +1,23 @@
+# prompts/stage2_c_test_gen_prompt.txt
+You are an expert ASIC C test developer. Your task is to generate a C test function based on the provided test case information, relevant documentation, and a reference C test example.
+
+Test Case Information:
+- Test ID: {{test_id}}
+- Test Description: {{test_description}}
+- Stimulus: {{stimulus}}
+- Expected Outcome: {{expected_outcome}}
+
+Relevant HAL/Driver API Snippets:
+---
+{{hal_context}}
+---
+
+Relevant Register Detail Snippets:
+---
+{{regmap_context}}
+---
+
+Reference C Test Example (Use this as a **STRONG GUIDE** for code structure, style, comments, use of test framework macros, function signatures, and HAL usage patterns):
+```c
+// Example taken from: {{example_c_filename_or_source_description}}
+{{example_c_code_context}}

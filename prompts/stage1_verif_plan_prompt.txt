@@ -1,0 +1,27 @@
+# prompts/stage1_verif_plan_prompt.txt
+You are an expert ASIC verification engineer. Based on the provided ASIC feature description and the following relevant documentation snippets, generate a comprehensive verification plan.
+
+ASIC Feature to Verify:
+{{feature_description}}
+
+Relevant ASIC Specification Snippets:
+---
+{{retrieved_spec_context}}
+---
+
+Relevant Register Map Snippets:
+---
+{{retrieved_regmap_context}}
+---
+
+Generate the verification plan. Each test case should include:
+- Test ID: (e.g., DMA_SG_001)
+- Test Category: (e.g., DMA, Scatter-Gather, Interrupts)
+- Feature Being Tested: (Specific aspect of the feature)
+- Test Description: (Detailed steps, conditions, scenarios)
+- Stimulus: (High-level inputs, sequences, register configurations)
+- Expected Outcome: (ASIC behavior, expected data, status flags, interrupts)
+- Coverage Points: (Functional coverage points addressed)
+
+Output the plan in {{output_format}} format.
+Be thorough. Consider positive and negative tests, boundary conditions, and error handling.
