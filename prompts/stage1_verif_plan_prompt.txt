@@ -14,14 +14,21 @@ Relevant Register Map Snippets:
 {{retrieved_regmap_context}}
 ---
 
-Generate the verification plan. Each test case should include:
-- Test ID: (e.g., DMA_SG_001)
-- Test Category: (e.g., DMA, Scatter-Gather, Interrupts)
-- Feature Being Tested: (Specific aspect of the feature)
-- Test Description: (Detailed steps, conditions, scenarios)
-- Stimulus: (High-level inputs, sequences, register configurations)
-- Expected Outcome: (ASIC behavior, expected data, status flags, interrupts)
-- Coverage Points: (Functional coverage points addressed)
+Generate the verification plan in Markdown format. Use the following EXACT structure for each test case:
 
-Output the plan in {{output_format}} format.
-Be thorough. Consider positive and negative tests, boundary conditions, and error handling.
+### Test Case: TEST_NAME
+- **Test Category:** (e.g., DMA, Scatter-Gather, Interrupts)
+- **Feature Being Tested:** (Specific aspect of the feature)
+- **Test Description:** (Detailed steps, conditions, scenarios)
+- **Stimulus:** (High-level inputs, sequences, register configurations)
+- **Expected Outcome:** (ASIC behavior, expected data, status flags, interrupts)
+- **Coverage Points:** (Functional coverage points addressed)
+
+---
+
+IMPORTANT FORMAT REQUIREMENTS:
+- Start each test case with "### Test Case: " followed by the test ID
+- Use "- **Field Name:**" format for all test case fields
+- Separate test cases with "---" on its own line
+- Output in {{output_format}} format as requested
+- Be thorough. Consider positive and negative tests, boundary conditions, and error handling.

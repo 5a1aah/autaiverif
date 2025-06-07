@@ -2,3 +2,5 @@ requests
 sentence-transformers
 chromadb
 pandas
+PyMuPDF
+Pillow

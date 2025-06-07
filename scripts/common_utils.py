@@ -9,7 +9,8 @@ import time
 # --- OpenRouter API Configuration ---
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "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") # IMPORTANT: Replace with your key or set ENV VAR
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_MODEL_NAME = "deepseek/deepseek-coder" # Or your preferred DeepSeek V2 model
+DEEPSEEK_MODEL_NAME = "deepseek/deepseek-coder" # Or your preferred DeepSeek V2 model - DEPRECATED
+DEEPSEEK_MODEL_NAME_DEFAULT = os.getenv("DEEPSEEK_MODEL_NAME_DEFAULT", "deepseek/deepseek-chat-v3-0324:free") # Updated default model
 
 # --- Embedding Model and ChromaDB Configuration ---
 EMBEDDING_MODEL_NAME = 'all-MiniLM-L6-v2' # Small and fast, good for general purpose
@@ -73,9 +74,9 @@ def get_embedding_for_rag(text_chunk: str):
     return sentence_transformer_ef([text_chunk])[0]
 
 
-def call_deepseek_api(prompt_text: str, model_name: str = DEEPSEEK_MODEL_NAME, temperature: float = 0.5, max_tokens: int = 3000):
-    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "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":
-        print("ERROR: OPENROUTER_API_KEY is not set or is using the placeholder. Please set your valid API key.")
+def call_deepseek_api(prompt_text: str, model_name: str = DEEPSEEK_MODEL_NAME_DEFAULT, temperature: float = 0.5, max_tokens: int = 3000):
+    if not OPENROUTER_API_KEY or len(OPENROUTER_API_KEY.strip()) < 10:
+        print("ERROR: OPENROUTER_API_KEY is not set or appears to be invalid. Please set your valid API key.")
         return "Error: API Key not configured. Please check common_utils.py or environment variables."
 
     headers = {

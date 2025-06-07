@@ -144,7 +144,7 @@ class ASICVerificationAutomator:
         # Example test structure (from your stage1_verif_plan_prompt.txt)
         # Ensure this matches the example given to the LLM in the prompt file
         example_test_structure_in_prompt = """
-### Test Case: MOD_FUNC_001
+### Test Case: MOD_FUNC_NAME
 - **Test Category:** Category Name
 - **Feature Being Tested:** Specific Feature Aspect
 - **Test Description:** Detailed step-by-step explanation...
@@ -372,10 +372,14 @@ class ASICVerificationAutomator:
 
             if c_test_code.startswith("Error:"):
                 print(f"Failed to generate C code for {clean_test_id}: {c_test_code}")
-                continue
-
+                continue            
             c_test_code = re.sub(r"^```c\s*?\n", "", c_test_code, flags=re.MULTILINE)
             c_test_code = re.sub(r"\n```\s*$", "", c_test_code, flags=re.MULTILINE)
+            
+            # Import and apply LLM artifact cleanup
+            from .generate_c_tests import clean_llm_artifacts
+            c_test_code = clean_llm_artifacts(c_test_code)
+            
             c_test_code = c_test_code.strip()
             
             filename = output_path / f"test_{clean_test_id.lower()}.c"
@@ -389,3 +393,263 @@ class ASICVerificationAutomator:
                 
         print(f"\nSuccessfully generated {len(generated_files)} C test files.")
         return generated_files
+
+    def generate_uvm_verification_plan(self, feature_description: str, 
+                                     spec_text: str = None, 
+                                     address_map_text: str = None) -> str:
+        """
+        Generate a UVM verification plan for the given feature description.
+        
+        Args:
+            feature_description (str): Description of the ASIC feature to verify
+            spec_text (str, optional): Specification text context
+            address_map_text (str, optional): Address map text context
+            
+        Returns:
+            str: Generated UVM verification plan content
+        """
+        print(f"\n--- Generating UVM Verification Plan for: {feature_description} ---")
+        
+        # Retrieve relevant context using RAG
+        retrieved_spec_context = "No specification context provided."
+        if not spec_text:
+            spec_chunks = retrieve_relevant_chunks(
+                query_text=f"ASIC specification details for {feature_description}",
+                top_k=5, doc_type_filter="spec"
+            )
+            if spec_chunks:
+                retrieved_spec_context = "\n\n---\n\n".join(spec_chunks)
+        else:
+            retrieved_spec_context = spec_text
+
+        processed_address_map = "No address map provided."
+        if address_map_text:
+            processed_address_map = self.preprocess_address_map_text(address_map_text)
+        else:
+            addr_map_chunks = retrieve_relevant_chunks(
+                 query_text=f"Address map or register map relevant to {feature_description}",
+                 top_k=5, doc_type_filter="regmap"
+            )
+            if addr_map_chunks:
+                processed_address_map = self.preprocess_address_map_text("\n\n---\n\n".join(addr_map_chunks))
+
+        # Retrieve UVM context
+        uvm_chunks = retrieve_relevant_chunks(
+            query_text=f"UVM sequences and examples for {feature_description}",
+            top_k=3, doc_type_filter="uvm_example"
+        )
+        retrieved_uvm_context = "\n\n---\n\n".join(uvm_chunks) if uvm_chunks else "No UVM context retrieved."
+
+        # Load UVM verification plan template
+        prompt_template = load_prompt_template("stage1_uvm_verif_plan_prompt.txt")
+        if not prompt_template:
+            error_msg = "Error: Could not load UVM verification plan prompt template."
+            print(error_msg)
+            return error_msg
+        
+        # Replace placeholders in template
+        current_prompt = prompt_template.replace("{{feature_description}}", feature_description)
+        current_prompt = current_prompt.replace("{{retrieved_spec_context}}", retrieved_spec_context)
+        current_prompt = current_prompt.replace("{{retrieved_regmap_context}}", processed_address_map)
+        current_prompt = current_prompt.replace("{{retrieved_uvm_context}}", retrieved_uvm_context)
+        
+        print("Sending request to LLM for UVM verification plan generation...")
+        verification_plan = self._call_llm_api(current_prompt, max_tokens=4000, temperature=0.2)
+        
+        return verification_plan
+
+    def generate_uvm_tests_from_plan(self, verification_plan_content: str, 
+                                   output_path: Path = None) -> List[str]:
+        """
+        Generate UVM test files from a verification plan.
+        
+        Args:
+            verification_plan_content (str): Content of the verification plan
+            output_path (Path, optional): Directory to save generated tests
+            
+        Returns:
+            List[str]: List of paths to generated UVM test files
+        """
+        if output_path is None:
+            output_path = Path("generated_outputs/uvm_tests")
+        
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        print(f"\n--- Generating UVM Tests from Verification Plan ---")
+        
+        # Parse test cases from verification plan
+        test_cases = self._parse_uvm_test_cases(verification_plan_content)
+        print(f"Found {len(test_cases)} test cases in verification plan")
+        
+        if not test_cases:
+            print("No test cases found in verification plan")
+            return []
+        
+        # Load UVM test generation template
+        prompt_template_uvm = load_prompt_template("stage2_uvm_test_gen_prompt.txt")
+        if not prompt_template_uvm:
+            print("Error: Could not load UVM test generation prompt template.")
+            return []
+        
+        generated_files = []
+        
+        for i, test_case in enumerate(test_cases, 1):
+            print(f"Generating UVM test {i}/{len(test_cases)}: {test_case['test_id']}")
+            
+            try:
+                # Create RAG query from test case
+                rag_query = f"{test_case['test_id']} {test_case['content'][:200]}"
+                
+                # Retrieve relevant context
+                spec_chunks = retrieve_relevant_chunks(rag_query, top_k=3, doc_type_filter="spec")
+                retrieved_spec_context = "\n\n---\n\n".join(spec_chunks) if spec_chunks else "No specification context retrieved."
+                
+                regmap_chunks = retrieve_relevant_chunks(rag_query, top_k=3, doc_type_filter="regmap")
+                retrieved_regmap_context = "\n\n---\n\n".join(regmap_chunks) if regmap_chunks else "No register map context retrieved."
+                
+                uvm_chunks = retrieve_relevant_chunks(rag_query, top_k=2, doc_type_filter="uvm_example")
+                retrieved_uvm_context = "\n\n---\n\n".join(uvm_chunks) if uvm_chunks else "No UVM context retrieved."
+                
+                # Format prompt
+                current_prompt = prompt_template_uvm.replace("{{test_case}}", test_case['full_content'])
+                current_prompt = current_prompt.replace("{{retrieved_spec_context}}", retrieved_spec_context)
+                current_prompt = current_prompt.replace("{{retrieved_regmap_context}}", retrieved_regmap_context)
+                current_prompt = current_prompt.replace("{{retrieved_uvm_context}}", retrieved_uvm_context)
+                
+                print(f"Sending RAG-augmented request to LLM for UVM test generation ({test_case['test_id']})...")
+                uvm_test_code = self._call_llm_api(current_prompt, max_tokens=3000, temperature=0.1)
+
+                if uvm_test_code.startswith("Error:"):
+                    print(f"Failed to generate UVM code for {test_case['test_id']}: {uvm_test_code}")
+                    continue
+                
+                # Clean the generated UVM code
+                uvm_test_code = self._clean_uvm_test_code(uvm_test_code)
+                
+                # Generate safe filename
+                clean_test_id = re.sub(r'[^\w\-_]', '_', test_case['test_id'])
+                filename = output_path / f"test_{clean_test_id}.sv"
+                
+                # Add file header
+                file_header = f"""// filepath: {filename}
+ /**
+ * @file test_{clean_test_id}.sv
+ * @brief UVM test for {test_case['test_id']}
+ * 
+ * Generated on: {self.get_timestamp()}
+ */
+
+"""
+                
+                try:
+                    with open(filename, "w", encoding="utf-8") as f:
+                        f.write(file_header + uvm_test_code)
+                    generated_files.append(str(filename))
+                    print(f"Generated UVM test file: {filename}")
+                except IOError as e:
+                    print(f"Error saving UVM test file {filename}: {e}")
+                    
+            except Exception as e:
+                print(f"Error generating UVM test {test_case['test_id']}: {str(e)}")
+                continue
+                
+        print(f"\nSuccessfully generated {len(generated_files)} UVM test files.")
+        return generated_files
+
+    def _parse_uvm_test_cases(self, verification_plan_content: str) -> List[Dict[str, str]]:
+        """
+        Parse test cases from UVM verification plan content.
+        
+        Args:
+            verification_plan_content (str): Content of the verification plan
+            
+        Returns:
+            List[Dict[str, str]]: List of dictionaries containing test case information
+        """
+        test_cases = []
+        
+        # Pattern to match test cases
+        test_case_pattern = r'### Test Case: ([^\n]+)\n(.*?)(?=### Test Case:|$)'
+        matches = re.findall(test_case_pattern, verification_plan_content, re.DOTALL)
+        
+        for test_id, content in matches:
+            test_case = {
+                'test_id': test_id.strip(),
+                'content': content.strip(),
+                'full_content': f"### Test Case: {test_id}\n{content}".strip()
+            }
+            test_cases.append(test_case)
+        
+        return test_cases
+
+    def _clean_uvm_test_code(self, code_content: str) -> str:
+        """
+        Clean and validate UVM SystemVerilog test code.
+        
+        Args:
+            code_content (str): Raw UVM test code
+            
+        Returns:
+            str: Cleaned UVM test code
+        """
+        # Remove any markdown code block markers
+        code_content = re.sub(r'```systemverilog\n?', '', code_content)
+        code_content = re.sub(r'```\n?', '', code_content)
+        
+        # Remove any extra explanatory text that might be included
+        lines = code_content.split('\n')
+        cleaned_lines = []
+        inside_code = False
+        
+        for line in lines:
+            # Start collecting from the first meaningful SystemVerilog line
+            if (not inside_code and 
+                (line.strip().startswith('//') or 
+                 line.strip().startswith('`include') or
+                 line.strip().startswith('import') or
+                 line.strip().startswith('class') or
+                 line.strip().startswith('module'))):
+                inside_code = True
+            
+            if inside_code:
+                cleaned_lines.append(line)
+        
+        return '\n'.join(cleaned_lines).strip()
+
+    def retrieve_context(self, query: str, context_type: str, top_k: int = 3) -> str:
+        """
+        Retrieve relevant context using RAG for a given query and context type.
+        
+        Args:
+            query (str): Search query
+            context_type (str): Type of context to retrieve (specs, regmaps, uvm_examples, etc.)
+            top_k (int): Number of top results to retrieve
+            
+        Returns:
+            str: Retrieved context as formatted string
+        """
+        doc_type_map = {
+            "specs": "spec",
+            "regmaps": "regmap", 
+            "uvm_examples": "uvm_example",
+            "hal": "hal",
+            "c_examples": "c_example"
+        }
+        
+        doc_type_filter = doc_type_map.get(context_type, context_type)
+        
+        chunks = retrieve_relevant_chunks(
+            query_text=query,
+            top_k=top_k,
+            doc_type_filter=doc_type_filter
+        )
+        
+        if chunks:
+            return "\n\n---\n\n".join(chunks)
+        else:
+            return f"No {context_type} context retrieved."
+
+    def get_timestamp(self) -> str:
+        """Get current timestamp string."""
+        from datetime import datetime
+        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")

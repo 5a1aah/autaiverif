@@ -30,3 +30,12 @@ The CVA6 core typically features separate instruction and data caches (I-cache a
 
 Interrupt Handling:
 CVA6 supports standard RISC-V interrupt mechanisms. Machine Timer Interrupts (MTIP), Machine Software Interrupts (MSIP), and Machine External Interrupts (MEIP) are handled via the `mcause`, `mepc`, `mtval`, and `mstatus` CSRs. Supervisor level interrupts are similarly handled with `scause`, `sepc`, etc. External interrupts are typically routed through a Platform-Level Interrupt Controller (PLIC).
+
+Core Local Interruptor (CLINT):
+- The CLINT is a standard RISC-V component responsible for generating timer interrupts and inter-processor software interrupts.
+- It typically contains memory-mapped registers:
+    - `mtime`: A 64-bit register that increments at a constant frequency, representing the current time.
+    - `mtimecmp`: A 64-bit register per hart. A machine timer interrupt (MTIP) is pending for a hart whenever `mtime` is greater than or equal to its `mtimecmp`.
+    - `msip`: A 32-bit register per hart. A machine software interrupt (MSIP) is pending for a hart when the corresponding bit in its `msip` register is set.
+- CVA6 interacts with the CLINT to receive timer and software interrupts. The CLINT is usually located outside the core itself, as a separate peripheral in the system-on-chip (SoC).
+

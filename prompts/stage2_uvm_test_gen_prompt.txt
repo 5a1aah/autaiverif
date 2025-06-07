@@ -1,0 +1,62 @@
+# prompts/stage2_uvm_test_gen_prompt.txt
+You are an expert UVM verification engineer. Based on the provided verification plan test case and relevant context, generate a complete SystemVerilog UVM test.
+
+Test Case from Verification Plan:
+{{test_case}}
+
+Relevant ASIC Specification Snippets:
+---
+{{retrieved_spec_context}}
+---
+
+Relevant Register Map Snippets:
+---
+{{retrieved_regmap_context}}
+---
+
+Relevant UVM Sequence Examples:
+---
+{{retrieved_uvm_context}}
+---
+
+Generate a complete SystemVerilog UVM test file with the following requirements:
+
+1. **File Structure:**
+   - Include proper file header with description
+   - Import necessary UVM packages and macros
+   - Define the test class extending uvm_test
+   - Implement build_phase, run_phase, and other UVM phases as needed
+
+2. **UVM Test Implementation:**
+   - Use appropriate sequences from project_sequences.sv
+   - Configure sequence constraints based on test requirements
+   - Implement proper UVM objection handling
+   - Add comprehensive UVM info/error reporting
+
+3. **Code Quality:**
+   - Follow SystemVerilog and UVM coding standards
+   - Use meaningful variable and function names
+   - Add inline comments explaining complex logic
+   - Include proper error handling and assertions
+
+4. **Test Execution:**
+   - Configure sequences with appropriate parameters
+   - Set up proper timing and synchronization
+   - Include stimulus generation and response checking
+   - Implement timeout handling
+
+5. **Coverage and Checking:**
+   - Add functional coverage points where applicable
+   - Include assertions for protocol compliance
+   - Implement self-checking mechanisms
+
+IMPORTANT REQUIREMENTS:
+- Generate ONLY the SystemVerilog UVM test code
+- Do not include compilation instructions or makefile content
+- Ensure the code is syntactically correct SystemVerilog
+- Use proper UVM methodology and best practices
+- Reference and extend sequences from project_sequences.sv
+- Include comprehensive error checking and reporting
+- Follow proper UVM phase usage (build_phase, run_phase, etc.)
+
+The generated test should be immediately usable in a UVM testbench environment.

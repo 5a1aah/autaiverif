@@ -21,3 +21,39 @@ Reference C Test Example (Use this as a **STRONG GUIDE** for code structure, sty
 ```c
 // Example taken from: {{example_c_filename_or_source_description}}
 {{example_c_code_context}}
+```
+
+## Instructions:
+
+1. **Follow the Reference Example Structure**: Use the provided reference C test example as your primary guide for:
+   - Code structure and organization
+   - Function signatures and naming conventions
+   - Comment style and formatting
+   - HAL API usage patterns
+
+2. **Include Essential Test Framework Elements**: Your generated C test MUST include:
+   - **All necessary #include directives** (stdio.h, stdint.h, HAL headers, etc.)
+   - **Complete macro definitions** exactly as shown in the reference example using `#ifndef` guards for example:
+     - `VERIF_LOG` macro for logging with proper formatting
+     - `ASSERT_EQUAL`, `ASSERT_NOT_EQUAL`, `ASSERT_TRUE`, `ASSERT_FALSE` macros as needed
+     - `current_test_id_global` variable set to the test ID
+   - **Do NOT use** `#include "test_framework.h"` - instead define macros inline exactly like the reference
+   - **Proper test function signature** following the naming pattern `test_{{test_id}}(void)`
+
+3. **Test Implementation Requirements**:
+   - Set `current_test_id_global = "{{test_id}}";` at the beginning of your test function
+   - Use `VERIF_LOG` for all test progress and status messages
+   - Use appropriate `ASSERT_*` macros for all verification points
+   - Include comprehensive error handling and status reporting
+   - Add descriptive comments explaining each test step
+
+4. **Code Quality Standards**:
+   - Write self-contained, compilable C code
+   - Use appropriate data types (uint32_t, uint64_t, etc.)
+   - Include proper register definitions and constants as needed
+   - Follow the HAL API patterns shown in the reference
+   - Ensure proper return values (0 for success, 1 for failure)
+
+5. **Output Format**: Generate ONLY the complete C test file content with all necessary macros and includes. Do not include markdown code blocks or explanatory text.
+
+Generate the complete C test file for Test ID: {{test_id}}

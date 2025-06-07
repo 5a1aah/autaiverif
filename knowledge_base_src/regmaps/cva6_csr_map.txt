@@ -54,3 +54,25 @@ User-Level CSRs (Counters/Timers - access controlled by mcounteren/scounteren):
 
 Note: Access to some CSRs may depend on the current privilege level and ISA extensions implemented/enabled (e.g., 'U' extension for user-mode counters).
 The actual implementation of counters like mcycle and minstret can vary; some CVA6 configurations might implement them as 64-bit, while others might have 32-bit versions (mcycleh, minstreth).
+
+CVA6 Memory-Mapped Peripherals:
+
+CLINT (Core Local Interruptor):
+- Base Address: 0x0200_0000
+    - msip      (0x0000): Machine software interrupt pending (per-hart).
+    - mtimecmp  (0x4000): Machine timer compare (per-hart).
+    - mtime     (0xBFF8): Real-time clock.
+
+PLIC (Platform-Level Interrupt Controller):
+- Base Address: 0x0C00_0000
+    - Interrupt Source Priority Registers: 0x0C00_0000 - 0x0C00_0FFF
+    - Pending Interrupts: 0x0C00_1000 - 0x0C00_1FFF
+    - Enable Registers: 0x0C00_2000 - 0x0C00_2FFF
+    - Priority Thresholds & Claim/Complete: 0x0C20_0000 - 0x0C20_0FFF
+
+APB Timer :
+- Base Address: 0xF00_0000 
+    - apb_timer_ctrl   (0x00): Control register.
+    - apb_timer_value  (0x04): Current timer value.
+    - apb_timer_reload (0x08): Reload value.
+    - apb_timer_irq    (0x0C): Interrupt status/clear.

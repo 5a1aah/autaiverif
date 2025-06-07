@@ -1,0 +1,58 @@
+# prompts/stage1_uvm_verif_plan_prompt.txt
+You are an expert UVM verification engineer. Based on the provided ASIC feature description and the following relevant documentation snippets, generate a comprehensive UVM verification plan.
+
+ASIC Feature to Verify:
+{{feature_description}}
+
+Relevant ASIC Specification Snippets:
+---
+{{retrieved_spec_context}}
+---
+
+Relevant Register Map Snippets:
+---
+{{retrieved_regmap_context}}
+---
+
+Relevant UVM Sequence Examples:
+---
+{{retrieved_uvm_context}}
+---
+
+Generate the UVM verification plan in Markdown format. Use the following EXACT structure for each test case:
+
+### Test Case: TEST_NAME
+- **Test Category:** (e.g., AXI Interface, CSR Access, Interrupts, Cache Coherency)
+- **Feature Being Tested:** (Specific aspect of the feature)
+- **Test Description:** (Detailed UVM test scenario, sequences, and components)
+- **UVM Sequences:** (Primary sequences to be used from project_sequences.sv)
+- **Stimulus:** (High-level UVM stimulus, sequence configurations, constraints)
+- **Expected Outcome:** (ASIC behavior, expected responses, UVM monitor checks)
+- **Coverage Points:** (Functional coverage points and UVM coverage model)
+- **UVM Components:** (Required agents, monitors, scoreboards)
+
+---
+
+IMPORTANT FORMAT REQUIREMENTS:
+- Start each test case with "### Test Case: " followed by the test NAME
+- Use "- **Field Name:**" format for all test case fields
+- Focus on UVM-specific verification methodology
+- Reference sequences from project_sequences.sv when applicable
+- Include UVM component requirements (agents, monitors, scoreboards)
+- Specify UVM sequence configurations and constraints
+- Define functional coverage requirements for UVM coverage model
+
+The verification plan should be comprehensive and cover:
+1. Normal operation scenarios
+2. Corner cases and boundary conditions
+3. Error injection and handling
+4. Protocol compliance verification
+5. Performance and stress testing
+6. Power and reset scenarios
+
+Each test case should leverage UVM methodology including:
+- Constrained random stimulus
+- Layered testbench architecture
+- Reusable sequences and transactions
+- Comprehensive functional coverage
+- Self-checking mechanisms through monitors and scoreboards

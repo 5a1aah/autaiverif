@@ -53,12 +53,10 @@ def generate_verification_plan(feature_description: str, output_format: str = "s
 
     if not llm_response or llm_response.startswith("Error:"):
         print(f"LLM API call failed or returned an error: {llm_response}")
-        return
-
-    # 5. Save the generated plan
+        return    # 5. Save the generated plan
     GENERATED_PLANS_PATH.mkdir(parents=True, exist_ok=True)
     safe_feature_name = "".join(c if c.isalnum() else "_" for c in feature_description[:50])
-    file_extension = ".txt" # Default
+    file_extension = ".md" # Default to markdown for compatibility with automator.py
     if output_format.lower() == "json":
         file_extension = ".json"
     elif output_format.lower() == "csv": # Note: LLM might struggle with perfect CSV directly
@@ -70,9 +68,9 @@ def generate_verification_plan(feature_description: str, output_format: str = "s
         with open(output_filename, 'w', encoding='utf-8') as f:
             f.write(llm_response)
         print(f"\nVerification plan saved successfully to: {output_filename}")
-        print("\n--- Generated Verification Plan ---")
-        print(llm_response[:1000] + "..." if len(llm_response) > 1000 else llm_response) # Print a snippet
-        print("--- End of Snippet ---")
+        # print("\n--- Generated Verification Plan ---")
+        # print(llm_response[:1000] + "..." if len(llm_response) > 1000 else llm_response) # Print a snippet
+        # print("--- End of Snippet ---")
 
     except IOError as e:
         print(f"Error saving verification plan to file: {e}")

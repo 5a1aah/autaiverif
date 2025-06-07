@@ -90,12 +90,13 @@ def process_and_add_file(file_path: Path, doc_type: str):
     
     if not content.strip():
         print(f"Skipping empty or unreadable file: {file_path}")
-        return    # Determine chunking strategy based on file type and doc_type
+        return
+
+    # Determine chunking strategy based on file type and doc_type
     if doc_type in ["spec", "regmap", "hal_doc"] or file_path.suffix.lower() == '.pdf':
         chunks = chunk_text_content(content)
-    elif doc_type in ["c_example", "hal_code", "uvm_example"]:
-        chunks = chunk_code_content(content, file_path.name)
-    else:
+    elif doc_type in ["c_example", "hal_code"]:
+        chunks = chunk_code_content(content, file_path.name)    else:
         print(f"Unknown document type '{doc_type}' for file {file_path}. Using default text chunking.")
         chunks = chunk_text_content(content)
 
@@ -138,17 +139,18 @@ def populate_knowledge_base():
     """
     # Ensure client and collection are ready and assigned in common_utils
     # This function in common_utils now handles the global assignment of kb_collection
-    common_utils.initialize_chromadb_client_and_collection()     # Now, check if kb_collection in common_utils was successfully initialized
+    common_utils.initialize_chromadb_client_and_collection() 
+
+    # Now, check if kb_collection in common_utils was successfully initialized
     if common_utils.kb_collection is None:
         print("Error: ChromaDB collection could not be initialized (common_utils.kb_collection is None). Aborting KB population.")
-        return    
+        return
 
     doc_type_map = {
         "specs": "spec",
         "hal": "hal_doc",
         "regmaps": "regmap",
-        "c_test_examples": "c_example",
-        "uvm_examples": "uvm_example"
+        "c_test_examples": "c_example"
     }
     hal_code_extensions = {".h", ".c"}
 
