@@ -381,3 +381,147 @@ class virtual_memory_sequence extends cva6_base_sequence;
         end
     endtask
 endclass
+
+
+//----------------------------------------------------------------------
+// AXI Base Sequence
+//----------------------------------------------------------------------
+class axi_base_seq extends uvm_sequence#(axi_item);
+  function new(string name = "axi_base_seq");
+    super.new(name);
+  endfunction
+
+  `uvm_object_utils(axi_base_seq)
+  `uvm_declare_p_sequencer(axi_sequencer) // Optional, for direct sequencer access
+endclass : axi_base_seq
+
+//----------------------------------------------------------------------
+// Single Write Sequence
+//----------------------------------------------------------------------
+class axi_single_write_seq extends axi_base_seq;
+  rand bit [31:0] start_addr;
+  rand bit [31:0] write_data;
+
+  function new(string name = "axi_single_write_seq");
+    super.new(name);
+  endfunction
+
+  `uvm_object_utils(axi_single_write_seq)
+
+  virtual task body();
+    req = axi_item::type_id::create("req");
+    start_item(req);
+    assert(req.randomize() with {
+      kind == AXI_WRITE;
+      addr == start_addr;
+      wdata == write_data;
+    });
+    finish_item(req);
+  endtask : body
+endclass : axi_single_write_seq
+
+//----------------------------------------------------------------------
+// Single Read Sequence
+//----------------------------------------------------------------------
+class axi_single_read_seq extends axi_base_seq;
+  rand bit [31:0] start_addr;
+
+  function new(string name = "axi_single_read_seq");
+    super.new(name);
+  endfunction
+
+  `uvm_object_utils(axi_single_read_seq)
+
+  virtual task body();
+    req = axi_item::type_id::create("req");
+    start_item(req);
+    assert(req.randomize() with {
+      kind == AXI_READ;
+      addr == start_addr;
+    });
+    finish_item(req);
+    get_response(rsp);
+    // Optional: Print the read data
+    `uvm_info(get_type_name(), $sformatf("Read data: 0x%h from address 0x%h", rsp.rdata, rsp.addr), UVM_MEDIUM)
+  endtask : body
+endclass : axi_single_read_seq
+
+//----------------------------------------------------------------------
+// Burst Write Sequence
+//----------------------------------------------------------------------
+class axi_burst_write_seq extends axi_base_seq;
+  rand bit [31:0] start_addr;
+  rand int unsigned num_trans = 4; // Number of transfers in the burst
+
+  function new(string name = "axi_burst_write_seq");
+    super.new(name);
+  endfunction
+
+  `uvm_object_utils(axi_burst_write_seq)
+
+  virtual task body();
+    foreach (i in [0:num_trans-1]) begin
+      req = axi_item::type_id::create("req");
+      start_item(req);
+      assert(req.randomize() with {
+        kind == AXI_WRITE;
+        addr == start_addr + i * 4; // Assuming 32-bit alignment
+      });
+      finish_item(req);
+    end
+  endtask : body
+endclass : axi_burst_write_seq
+
+//----------------------------------------------------------------------
+// Burst Read Sequence
+//----------------------------------------------------------------------
+class axi_burst_read_seq extends axi_base_seq;
+  rand bit [31:0] start_addr;
+  rand int unsigned num_trans = 4; // Number of transfers in the burst
+
+  function new(string name = "axi_burst_read_seq");
+    super.new(name);
+  endfunction
+
+  `uvm_object_utils(axi_burst_read_seq)
+
+  virtual task body();
+    foreach (i in [0:num_trans-1]) begin
+      req = axi_item::type_id::create("req");
+      start_item(req);
+      assert(req.randomize() with {
+        kind == AXI_READ;
+        addr == start_addr + i * 4; // Assuming 32-bit alignment
+      });
+      finish_item(req);
+      get_response(rsp);
+      `uvm_info(get_type_name(), $sformatf("Read data: 0x%h from address 0x%h", rsp.rdata, rsp.addr), UVM_MEDIUM)
+    end
+  endtask : body
+endclass : axi_burst_read_seq
+
+//----------------------------------------------------------------------
+// Mixed Read/Write Sequence
+//----------------------------------------------------------------------
+class axi_mixed_read_write_seq extends axi_base_seq;
+  rand int unsigned num_repeats = 5;
+
+  function new(string name = "axi_mixed_read_write_seq");
+    super.new(name);
+  endfunction
+
+  `uvm_object_utils(axi_mixed_read_write_seq)
+
+  virtual task body();
+    repeat (num_repeats) begin
+      axi_single_write_seq write_seq = axi_single_write_seq::type_id::create("write_seq");
+      axi_single_read_seq  read_seq  = axi_single_read_seq::type_id::create("read_seq");
+
+      assert(write_seq.randomize());
+      write_seq.start(m_sequencer);
+
+      assert(read_seq.randomize() with { start_addr == write_seq.start_addr; });
+      read_seq.start(m_sequencer);
+    end
+  endtask : body
+endclass : axi_mixed_read_write_seq

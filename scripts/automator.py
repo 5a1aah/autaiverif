@@ -431,14 +431,55 @@ class ASICVerificationAutomator:
                  top_k=5, doc_type_filter="regmap"
             )
             if addr_map_chunks:
-                processed_address_map = self.preprocess_address_map_text("\n\n---\n\n".join(addr_map_chunks))
-
-        # Retrieve UVM context
-        uvm_chunks = retrieve_relevant_chunks(
+                processed_address_map = self.preprocess_address_map_text("\n\n---\n\n".join(addr_map_chunks))        # Retrieve UVM context - Multiple queries to get comprehensive sequence coverage
+        uvm_chunks = []
+        
+        # Query 1: General UVM sequences for the feature
+        uvm_chunks_general = retrieve_relevant_chunks(
             query_text=f"UVM sequences and examples for {feature_description}",
             top_k=3, doc_type_filter="uvm_example"
         )
-        retrieved_uvm_context = "\n\n---\n\n".join(uvm_chunks) if uvm_chunks else "No UVM context retrieved."
+        if uvm_chunks_general:
+            uvm_chunks.extend(uvm_chunks_general)
+        
+        # Query 2: Specific sequence types based on feature description
+        sequence_keywords = []
+        if any(keyword in feature_description.lower() for keyword in ['axi', 'memory', 'interface']):
+            sequence_keywords.extend(['axi_read_sequence', 'axi_write_sequence', 'axi_burst'])
+        if any(keyword in feature_description.lower() for keyword in ['register', 'csr', 'clint']):
+            sequence_keywords.extend(['csr_access_sequence', 'register'])
+        if any(keyword in feature_description.lower() for keyword in ['interrupt', 'timer']):
+            sequence_keywords.extend(['interrupt_sequence'])
+        if any(keyword in feature_description.lower() for keyword in ['cache']):
+            sequence_keywords.extend(['cache_coherency_sequence'])
+        
+        for keyword in sequence_keywords:
+            seq_chunks = retrieve_relevant_chunks(
+                query_text=f"{keyword} sequence implementation",
+                top_k=2, doc_type_filter="uvm_example"
+            )
+            if seq_chunks:
+                uvm_chunks.extend(seq_chunks)
+        
+        # Query 3: Get all available sequences for reference
+        all_seq_chunks = retrieve_relevant_chunks(
+            query_text="class extends uvm_sequence sequence",
+            top_k=5, doc_type_filter="uvm_example"
+        )
+        if all_seq_chunks:
+            uvm_chunks.extend(all_seq_chunks)
+          # Remove duplicates while preserving order
+        seen = set()
+        unique_uvm_chunks = []
+        for chunk in uvm_chunks:
+            if chunk not in seen:
+                seen.add(chunk)
+                unique_uvm_chunks.append(chunk)
+        
+        retrieved_uvm_context = "\n\n---\n\n".join(unique_uvm_chunks) if unique_uvm_chunks else "No UVM context retrieved."
+
+        # Extract available UVM sequences dynamically
+        available_uvm_sequences = self._extract_available_uvm_sequences()
 
         # Load UVM verification plan template
         prompt_template = load_prompt_template("stage1_uvm_verif_plan_prompt.txt")
@@ -446,12 +487,12 @@ class ASICVerificationAutomator:
             error_msg = "Error: Could not load UVM verification plan prompt template."
             print(error_msg)
             return error_msg
-        
-        # Replace placeholders in template
+          # Replace placeholders in template
         current_prompt = prompt_template.replace("{{feature_description}}", feature_description)
         current_prompt = current_prompt.replace("{{retrieved_spec_context}}", retrieved_spec_context)
         current_prompt = current_prompt.replace("{{retrieved_regmap_context}}", processed_address_map)
         current_prompt = current_prompt.replace("{{retrieved_uvm_context}}", retrieved_uvm_context)
+        current_prompt = current_prompt.replace("{{available_uvm_sequences}}", available_uvm_sequences)
         
         print("Sending request to LLM for UVM verification plan generation...")
         verification_plan = self._call_llm_api(current_prompt, max_tokens=4000, temperature=0.2)
@@ -459,13 +500,14 @@ class ASICVerificationAutomator:
         return verification_plan
 
     def generate_uvm_tests_from_plan(self, verification_plan_content: str, 
-                                   output_path: Path = None) -> List[str]:
+                                   output_path: Path = None, coverage_enable: bool = False) -> List[str]:
         """
         Generate UVM test files from a verification plan.
         
         Args:
             verification_plan_content (str): Content of the verification plan
             output_path (Path, optional): Directory to save generated tests
+            coverage_enable (bool, optional): Enable comprehensive coverage points in tests
             
         Returns:
             List[str]: List of paths to generated UVM test files
@@ -509,12 +551,68 @@ class ASICVerificationAutomator:
                 
                 uvm_chunks = retrieve_relevant_chunks(rag_query, top_k=2, doc_type_filter="uvm_example")
                 retrieved_uvm_context = "\n\n---\n\n".join(uvm_chunks) if uvm_chunks else "No UVM context retrieved."
-                
-                # Format prompt
+                  # Format prompt
                 current_prompt = prompt_template_uvm.replace("{{test_case}}", test_case['full_content'])
                 current_prompt = current_prompt.replace("{{retrieved_spec_context}}", retrieved_spec_context)
                 current_prompt = current_prompt.replace("{{retrieved_regmap_context}}", retrieved_regmap_context)
                 current_prompt = current_prompt.replace("{{retrieved_uvm_context}}", retrieved_uvm_context)
+                  # Add coverage requirements if enabled
+                if coverage_enable:
+                    coverage_requirements = """
+
+COMPREHENSIVE COVERAGE REQUIREMENTS:
+Generate extensive coverage points including:
+
+1. **Functional Coverage:**
+   - Cover all major functional scenarios and corner cases
+   - Create covergroups for transaction types, data patterns, and protocol states
+   - Include cross-coverage between different signals and conditions
+   - Add coverage for error conditions and recovery scenarios
+
+2. **Protocol Coverage:**
+   - Cover all valid protocol combinations and sequences
+   - Include coverage for timing relationships and handshake protocols
+   - Add coverage for different burst types, sizes, and address patterns
+   - Cover all valid and invalid protocol transitions
+
+3. **Data Coverage:**
+   - Cover data patterns (all 0s, all 1s, alternating, random)
+   - Include address boundary coverage (aligned, unaligned, wraparound)
+   - Add coverage for different data sizes and byte enables
+   - Cover special values and edge cases
+
+4. **Implementation Details:**
+   - Use `covergroup` constructs with proper `coverpoint` and `cross` statements
+   - Include `bins` for discrete values and `ignore_bins` for invalid cases
+   - Add proper `iff` conditions for sampling coverage
+   - Use meaningful coverage group names and comments
+
+Example coverage structure to include:
+```systemverilog
+covergroup protocol_cg;
+    addr_cp: coverpoint transaction.addr {
+        bins low_addr = {[0:1023]};
+        bins mid_addr = {[1024:2047]};  
+        bins high_addr = {[2048:4095]};
+    }
+    
+    size_cp: coverpoint transaction.size {
+        bins byte_access = {0};
+        bins halfword = {1};
+        bins word = {2};
+    }
+    
+    cross addr_cp, size_cp;
+endgroup
+```
+
+IMPORTANT: Implement these coverage points as covergroups within the test class and ensure they are properly instantiated and sampled.
+"""
+                else:
+                    coverage_requirements = "Basic coverage points will be included as per standard UVM practice."
+                
+                # Replace coverage placeholder
+                current_prompt = current_prompt.replace("{{coverage_requirements}}", coverage_requirements)
                 
                 print(f"Sending RAG-augmented request to LLM for UVM test generation ({test_case['test_id']})...")
                 uvm_test_code = self._call_llm_api(current_prompt, max_tokens=3000, temperature=0.1)
@@ -653,3 +751,76 @@ class ASICVerificationAutomator:
         """Get current timestamp string."""
         from datetime import datetime
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def _extract_available_uvm_sequences(self) -> str:
+        """
+        Dynamically extract all available UVM sequence names from the knowledge base.
+        
+        Returns:
+            str: Formatted list of available UVM sequence names
+        """
+        # Query all UVM examples to find sequence definitions
+        all_uvm_chunks = retrieve_relevant_chunks(
+            query_text="class extends uvm_sequence",
+            top_k=20, doc_type_filter="uvm_example"
+        )
+        
+        sequence_names = set()
+        
+        # Extract class names that extend uvm_sequence
+        for chunk in all_uvm_chunks:
+            lines = chunk.split('\n')
+            for line in lines:
+                line = line.strip()
+                # Look for class definitions that extend uvm_sequence or similar patterns
+                if 'class ' in line and ('extends' in line or ':' in line):
+                    # Pattern: class sequence_name extends base_class
+                    import re
+                    patterns = [
+                        r'class\s+(\w+)\s+extends\s+\w*sequence',
+                        r'class\s+(\w+)\s+extends\s+base_sequence',
+                        r'class\s+(\w+)\s+extends\s+axi_base_seq',
+                        r'class\s+(\w+)\s*:\s*',  # For other inheritance patterns
+                    ]
+                    
+                    for pattern in patterns:
+                        match = re.search(pattern, line, re.IGNORECASE)
+                        if match:
+                            seq_name = match.group(1)
+                            # Filter out base classes and utility classes
+                            if not seq_name.endswith('_base') and 'base' not in seq_name.lower():
+                                sequence_names.add(seq_name)
+                            break
+        
+        # Format the sequence list
+        if sequence_names:
+            sequence_list = sorted(list(sequence_names))
+            formatted_sequences = "Available UVM Sequences:\n"
+            for seq in sequence_list:
+                formatted_sequences += f"- {seq}\n"
+            formatted_sequences += "\nSequence Descriptions:\n"
+            
+            # Add brief descriptions based on naming patterns
+            for seq in sequence_list:
+                if 'axi' in seq.lower() and 'read' in seq.lower():
+                    formatted_sequences += f"- {seq}: For AXI read operations\n"
+                elif 'axi' in seq.lower() and 'write' in seq.lower():
+                    formatted_sequences += f"- {seq}: For AXI write operations\n"
+                elif 'axi' in seq.lower() and 'burst' in seq.lower():
+                    formatted_sequences += f"- {seq}: For AXI burst transactions\n"
+                elif 'csr' in seq.lower() or 'register' in seq.lower():
+                    formatted_sequences += f"- {seq}: For CSR/register access operations\n"
+                elif 'interrupt' in seq.lower():
+                    formatted_sequences += f"- {seq}: For interrupt testing scenarios\n"
+                elif 'cache' in seq.lower():
+                    formatted_sequences += f"- {seq}: For cache coherency testing\n"
+                elif 'memory' in seq.lower():
+                    formatted_sequences += f"- {seq}: For memory operations\n"
+                elif 'pipeline' in seq.lower():
+                    formatted_sequences += f"- {seq}: For instruction pipeline testing\n"
+                else:
+                    formatted_sequences += f"- {seq}: Available for verification scenarios\n"
+            
+            return formatted_sequences
+        else:
+            return "No UVM sequences found in knowledge base."

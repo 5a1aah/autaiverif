@@ -49,6 +49,9 @@ Generate a complete SystemVerilog UVM test file with the following requirements:
    - Add functional coverage points where applicable
    - Include assertions for protocol compliance
    - Implement self-checking mechanisms
+   - Follow coverage requirements specified below
+
+{{coverage_requirements}}
 
 IMPORTANT REQUIREMENTS:
 - Generate ONLY the SystemVerilog UVM test code

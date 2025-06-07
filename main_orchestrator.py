@@ -197,12 +197,11 @@ def main():
     parser_gen_uvm_plan.add_argument("--spec_file", type=str, help="Optional: Path to the ASIC specification file for additional context.")
     parser_gen_uvm_plan.add_argument("--address_map_file", type=str, help="Optional: Path to the address map file for register-level testing context.")
     parser_gen_uvm_plan.add_argument("--output", type=str, default="generated_outputs/uvm_verification_plans", help="Directory to save the generated UVM verification plan.")
-    parser_gen_uvm_plan.set_defaults(func=handle_gen_uvm_plan)
-
-    # --- Add new subparser for UVM test generation ---
+    parser_gen_uvm_plan.set_defaults(func=handle_gen_uvm_plan)    # --- Add new subparser for UVM test generation ---
     parser_gen_uvm_tests = subparsers.add_parser("gen_uvm_tests", help="Generate UVM test files from a verification plan.")
     parser_gen_uvm_tests.add_argument("plan_file", type=str, help="Path to the UVM verification plan file (Markdown format).")
     parser_gen_uvm_tests.add_argument("--output", type=str, default="generated_outputs/uvm_tests", help="Directory to save the generated UVM test files.")
+    parser_gen_uvm_tests.add_argument("--coverage_enable", action="store_true", help="Enable comprehensive coverage points in generated UVM tests.")
     parser_gen_uvm_tests.set_defaults(func=handle_gen_uvm_tests)
     # --- End of UVM subparsers ---
 
@@ -671,6 +670,10 @@ def handle_gen_uvm_tests(args):
     common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.deepseek_model
     
     print(f"Generating UVM tests from plan: {args.plan_file}")
+    if args.coverage_enable:
+        print("Coverage enhancement: ENABLED - Comprehensive coverage points will be included")
+    else:
+        print("Coverage enhancement: DISABLED - Basic coverage points will be included")
     
     # Check if plan file exists
     if not os.path.exists(args.plan_file):
@@ -686,15 +689,15 @@ def handle_gen_uvm_tests(args):
             api_key=args.openrouter_key,
             model_name=args.deepseek_model
         )
-        
-        # Read verification plan
+          # Read verification plan
         with open(args.plan_file, 'r', encoding='utf-8') as f:
             plan_content = f.read()
           # Generate UVM tests
         output_path = Path(args.output)
         generated_files = automator.generate_uvm_tests_from_plan(
             verification_plan_content=plan_content,
-            output_path=output_path
+            output_path=output_path,
+            coverage_enable=args.coverage_enable
         )
         
         print(f"\nUVM test generation completed!")

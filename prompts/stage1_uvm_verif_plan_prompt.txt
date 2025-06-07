@@ -19,13 +19,20 @@ Relevant UVM Sequence Examples:
 {{retrieved_uvm_context}}
 ---
 
+Available UVM Sequences from Knowledge Base:
+---
+{{available_uvm_sequences}}
+---
+
+CRITICAL REQUIREMENT: You MUST use the exact sequence names from the "Available UVM Sequences" list above in your verification plan. Do NOT create new sequence names. Only reference sequences that exist in the knowledge base.
+
 Generate the UVM verification plan in Markdown format. Use the following EXACT structure for each test case:
 
 ### Test Case: TEST_NAME
 - **Test Category:** (e.g., AXI Interface, CSR Access, Interrupts, Cache Coherency)
 - **Feature Being Tested:** (Specific aspect of the feature)
 - **Test Description:** (Detailed UVM test scenario, sequences, and components)
-- **UVM Sequences:** (Primary sequences to be used from project_sequences.sv)
+- **UVM Sequences:** (MUST use ONLY sequence names from the "Available UVM Sequences" list above. Use exact names like "axi_read_sequence", "csr_access_sequence", etc.)
 - **Stimulus:** (High-level UVM stimulus, sequence configurations, constraints)
 - **Expected Outcome:** (ASIC behavior, expected responses, UVM monitor checks)
 - **Coverage Points:** (Functional coverage points and UVM coverage model)
