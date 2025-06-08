@@ -4,6 +4,8 @@ from pathlib import Path
 import json
 import os
 from datetime import datetime
+import tkinter as tk
+import traceback
 
 # Add project root to sys.path to allow `from scripts import ...`
 PROJECT_ROOT_DIR = Path(__file__).resolve().parent
@@ -21,8 +23,36 @@ from scripts.feature_extractor import SpecFeatureExtractor
 from scripts.unified_generator import UnifiedVerificationGenerator
 from scripts.batch_processor import BatchProcessor
 
+def launch_gui():
+    """Launch the GUI application"""
+    try:
+        import tkinter as tk
+        # Import the GUI application
+        import gui_app
+        from gui_app import ASICVerificationGUI
+        
+        # Create and run the GUI
+        root = tk.Tk()
+        app = ASICVerificationGUI(root)
+        
+        print("Launching ASIC Verification GUI...")
+        root.mainloop()
+        
+    except ImportError as e:
+        print(f"Error: GUI dependencies not available: {e}")
+        print("Please ensure tkinter is installed on your system.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error launching GUI: {e}")
+        traceback.print_exc()
+        sys.exit(1)
+
 def main():
     parser = argparse.ArgumentParser(description="ASIC Verification Automation Orchestrator")
+    
+    # Add GUI mode option
+    parser.add_argument('--gui', action='store_true', 
+                      help='Launch GUI mode instead of command-line interface')
     
     # Add environment configuration arguments
     parser.add_argument('--openrouter-key', 
@@ -34,7 +64,27 @@ def main():
                       default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
                       help='DeepSeek model name (default: env var or hardcoded)')
 
+    # Check if GUI mode is requested before parsing subcommands
+    # This allows --gui to work without requiring a subcommand
+    temp_args, _ = parser.parse_known_args()
+    if temp_args.gui:
+        launch_gui()
+        return
+
     subparsers = parser.add_subparsers(dest="command", help="Available commands", required=True)
+
+    # Add populate_kb subparser
+    parser_populate = subparsers.add_parser("populate_kb", help="Process source documents and populate the RAG knowledge base.")
+    # Add API configuration arguments for consistency (though populate_kb doesn't use LLM)
+    parser_populate.add_argument('--openrouter-key', 
+                              type=str, 
+                              default=os.getenv('OPENROUTER_API_KEY', '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'),
+                              help='OpenRouter API key (default: env var or hardcoded)')
+    parser_populate.add_argument('--deepseek-model',
+                              type=str, 
+                              default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
+                              help='DeepSeek model name (default: env var or hardcoded)')
+    parser_populate.set_defaults(func=handle_populate_kb)
 
     # Update command handlers to use these configurations
     def handle_generate_all(args):
@@ -112,11 +162,7 @@ def main():
             if results.get('failed_features'):
                 print(f"  - Failed Features: {len(results['failed_features'])}")
                 # for failed in results['failed_features'][:3]: # Sample of failed features
-                #     print(f"    - {failed.get('name', 'Unknown Feature')}: {failed.get('error', 'Unknown Error')}")
-            print(f"  Check the directory \'{args.output_dir}\' for detailed outputs and summary report.")
-
-    parser_populate = subparsers.add_parser("populate_kb", help="Process source documents and populate the RAG knowledge base.")
-    parser_populate.set_defaults(func=handle_populate_kb)
+                #     print(f"    - {failed.get('name', 'Unknown Feature')}: {failed.get('error', 'Unknown Error')}")            print(f"  Check the directory \'{args.output_dir}\' for detailed outputs and summary report.")
 
     parser_gen_plan = subparsers.add_parser("gen_plan", help="Generate a verification plan for an ASIC feature.")
     parser_gen_plan.add_argument("feature_description", type=str, help="Description of the ASIC feature.")
