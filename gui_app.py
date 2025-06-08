@@ -25,7 +25,7 @@ from scripts.automator import ASICVerificationAutomator
 class ASICVerificationGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("ASIC Verification Automation Suite")
+        self.root.title("genToast: ASIC Verification agent Suite")
         self.root.geometry("1200x800")
         self.root.minsize(800, 600)
         
@@ -140,13 +140,13 @@ class ASICVerificationGUI:
     def create_plan_generation_tab(self):
         """Create verification plan generation tab"""
         plan_frame = ttk.Frame(self.notebook)
-        self.notebook.add(plan_frame, text="Verification Plans")
+        self.notebook.add(plan_frame, text="C Verification Plans")
         
         main_container = ttk.Frame(plan_frame)
         main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
         # Title
-        title_label = ttk.Label(main_container, text="Verification Plan Generation", style='Title.TLabel')
+        title_label = ttk.Label(main_container, text="C Verification Plan Generation", style='Title.TLabel')
         title_label.pack(pady=(0, 20))
         
         # Input Section
@@ -616,7 +616,7 @@ class ASICVerificationGUI:
                 result = subprocess.run([
                     sys.executable, "main_orchestrator.py", "populate_kb",
                     "--openrouter-key", self.api_key.get(),
-                    "--deepseek-model", self.model_name.get()
+                    "--llm-model", self.model_name.get()
                 ], capture_output=True, text=True, cwd=PROJECT_ROOT_DIR)
                 
                 if result.returncode == 0:
@@ -652,7 +652,7 @@ class ASICVerificationGUI:
                     sys.executable, "main_orchestrator.py", "gen_plan",
                     feature_desc,
                     "--openrouter-key", self.api_key.get(),
-                    "--deepseek-model", self.model_name.get()
+                    "--llm-model", self.model_name.get()
                 ]
                 
                 result = subprocess.run(cmd, capture_output=True, text=True, cwd=PROJECT_ROOT_DIR)
@@ -684,7 +684,7 @@ class ASICVerificationGUI:
                     sys.executable, "main_orchestrator.py", "gen_uvm_plan",
                     feature_desc,
                     "--openrouter-key", self.api_key.get(),
-                    "--deepseek-model", self.model_name.get()
+                    "--llm-model", self.model_name.get()
                 ]
                 
                 result = subprocess.run(cmd, capture_output=True, text=True, cwd=PROJECT_ROOT_DIR)
@@ -717,7 +717,7 @@ class ASICVerificationGUI:
                     "--plan_file", plan_file,
                     "--output-dir", self.output_dir_var.get(),
                     "--openrouter-key", self.api_key.get(),
-                    "--deepseek-model", self.model_name.get()
+                    "--llm-model", self.model_name.get()
                 ]
                 
                 if self.addr_map_var.get():
@@ -753,7 +753,7 @@ class ASICVerificationGUI:
                     plan_file,
                     "--output", self.uvm_output_dir_var.get(),
                     "--openrouter-key", self.api_key.get(),
-                    "--deepseek-model", self.model_name.get()
+                    "--llm-model", self.model_name.get()
                 ]
                 
                 if self.coverage_enable_var.get():
@@ -817,7 +817,7 @@ class ASICVerificationGUI:
                     spec_file,
                     "--output_dir", self.comp_output_var.get(),
                     "--openrouter-key", self.api_key.get(),
-                    "--deepseek-model", self.model_name.get(),
+                    "--llm-model", self.model_name.get(),
                     "--verbose"
                 ]
                 
@@ -973,7 +973,7 @@ class ASICVerificationGUI:
                     "--test_file", str(test_path),
                     "--plan_file", self.plan_file_var.get(),
                     "--openrouter-key", self.api_key.get(),
-                    "--deepseek-model", self.model_name.get()
+                    "--llm-model", self.model_name.get()
                 ]
                 
                 result = subprocess.run(cmd, capture_output=True, text=True, cwd=PROJECT_ROOT_DIR)
@@ -1019,7 +1019,7 @@ class ASICVerificationGUI:
                     "--plan_file", str(plan_path),
                     "--excel_file", excel_file,
                     "--openrouter-key", self.api_key.get(),
-                    "--deepseek-model", self.model_name.get()
+                    "--llm-model", self.model_name.get()
                 ]
                 
                 result = subprocess.run(cmd, capture_output=True, text=True, cwd=PROJECT_ROOT_DIR)
@@ -1098,21 +1098,21 @@ class ASICVerificationGUI:
         """Display project structure in text widget"""
         structure = """
 asic_verification_automation/
-├── knowledge_base_src/       # Your raw documents for RAG
+├── knowledge_base_src/       # User raw documents
 │   ├── specs/                # ASIC specification documents
 │   ├── hal/                  # HAL documentation, .h files
 │   ├── regmaps/              # Register map details
 │   ├── c_test_examples/      # Example C test files
 │   └── uvm_examples/         # UVM sequence examples
 ├── generated_outputs/
-│   ├── verification_plans/   # Generated verification plans
+│   ├── verification_plans/   # Generated verification plans (C)
 │   ├── c_tests/              # Generated C test files
 │   ├── uvm_verification_plans/  # UVM verification plans
 │   ├── uvm_tests/            # Generated UVM test files
 │   └── excel_reports/        # Excel format reports
-├── scripts/                  # Core automation scripts
-├── prompts/                  # Prompt templates for LLM
-├── vector_db/                # ChromaDB vector database
+├── scripts/                  # Core agent scripts
+├── prompts/                  # Prompt templates
+├── vector_db/                # Database
 └── gui_app.py               # This GUI application
 
 Usage Instructions:
@@ -1120,7 +1120,7 @@ Usage Instructions:
 2. Populate knowledge base with your documents
 3. Generate verification plans from feature descriptions
 4. Generate test code from verification plans
-5. Use utilities for PDF conversion and comprehensive generation
+5. Use utilities for PDF conversion and comprehensive generation (unstable!)
 
 For batch/command-line usage, use main_orchestrator.py
         """

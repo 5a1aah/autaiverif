@@ -59,10 +59,10 @@ def main():
                       type=str, 
                       default=os.getenv('OPENROUTER_API_KEY', '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'),
                       help='OpenRouter API key (default: env var or hardcoded)')
-    parser.add_argument('--deepseek-model',
+    parser.add_argument('--llm-model',
                       type=str, 
                       default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
-                      help='DeepSeek model name (default: env var or hardcoded)')
+                      help='LLM model name (default: env var or hardcoded)')
 
     # Check if GUI mode is requested before parsing subcommands
     # This allows --gui to work without requiring a subcommand
@@ -80,10 +80,10 @@ def main():
                               type=str, 
                               default=os.getenv('OPENROUTER_API_KEY', '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'),
                               help='OpenRouter API key (default: env var or hardcoded)')
-    parser_populate.add_argument('--deepseek-model',
+    parser_populate.add_argument('--llm-model',
                               type=str, 
                               default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
-                              help='DeepSeek model name (default: env var or hardcoded)')
+                              help='LLM model name (default: env var or hardcoded)')
     parser_populate.set_defaults(func=handle_populate_kb)
 
     # Update command handlers to use these configurations
@@ -171,12 +171,13 @@ def main():
     # Add API configuration arguments
     parser_gen_plan.add_argument('--openrouter-key', 
                               type=str, 
-                              default=os.getenv('OPENROUTER_API_KEY', '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'),
+                              default=os.getenv('OPENROUTER_API_KEY', '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'),                              
                               help='OpenRouter API key (default: env var or hardcoded)')
     parser_gen_plan.add_argument('--llm-model',
                               type=str, 
                               default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
-                              help='DeepSeek model name (default: env var or hardcoded)')    # output_format is now handled by the prompt to the LLM within automator. Output is .md
+                              help='LLM model name (default: env var or hardcoded)')
+    # output_format is now handled by the prompt to the LLM within automator. Output is .md
     parser_gen_plan.set_defaults(func=handle_gen_plan)
     
     parser_gen_tests = subparsers.add_parser("gen_tests", help="Generate C tests from a verification plan.")
@@ -188,10 +189,10 @@ def main():
                               type=str, 
                               default=os.getenv('OPENROUTER_API_KEY', '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'),
                               help='OpenRouter API key (default: env var or hardcoded)')
-    parser_gen_tests.add_argument('--deepseek-model',
+    parser_gen_tests.add_argument('--llm-model',
                               type=str, 
                               default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
-                              help='DeepSeek model name (default: env var or hardcoded)')
+                              help='LLM model name (default: env var or hardcoded)')
     parser_gen_tests.set_defaults(func=handle_gen_tests)
 
     # --- Add new subparser for plan_to_excel ---
