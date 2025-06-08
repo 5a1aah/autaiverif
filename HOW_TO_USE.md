@@ -94,6 +94,8 @@ python main_orchestrator.py gen_uvm_plan "AXI4 slave interface verification with
 
 # Step 3: Generate UVM tests from the plan
 python main_orchestrator.py gen_uvm_tests "generated_outputs\uvm_verification_plans\uvm_verif_plan_AXI4_slave_interface_verification_with_protocol_compliance.md"
+
+python main_orchestrator.py gen_uvm_tests "generated_outputs\uvm_verification_plans\uvm_verif_plan_AXI4_memory_interface_verification_with_burst_tran.md" --coverage_enable --output "generated_outputs\uvm_tests_with_coverage"
 ```
 
 ### UVM Output Structure

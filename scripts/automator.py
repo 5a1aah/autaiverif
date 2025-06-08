@@ -609,7 +609,7 @@ endgroup
 IMPORTANT: Implement these coverage points as covergroups within the test class and ensure they are properly instantiated and sampled.
 """
                 else:
-                    coverage_requirements = "Basic coverage points will be included as per standard UVM practice."
+                    coverage_requirements = "Do not include any coverage points definitions in the generated UVM test code."
                 
                 # Replace coverage placeholder
                 current_prompt = current_prompt.replace("{{coverage_requirements}}", coverage_requirements)
