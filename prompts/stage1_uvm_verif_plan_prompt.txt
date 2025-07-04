@@ -26,7 +26,15 @@ Available UVM Sequences from Knowledge Base:
 
 CRITICAL REQUIREMENT: You MUST use the exact sequence names from the "Available UVM Sequences" list above in your verification plan. Do NOT create new sequence names. Only reference sequences that exist in the knowledge base.
 
-Generate the UVM verification plan in Markdown format. Use the following EXACT structure for each test case:
+OUTPUT FORMAT REQUIREMENTS:
+- Generate ONLY the verification plan content in Markdown format
+- DO NOT include any introductory text like "Here's the verification plan..."
+- DO NOT wrap the output in markdown code blocks (```markdown)
+- DO NOT include any concluding explanatory text
+- Start directly with the first test case
+- End with the last test case without additional commentary
+
+Generate the UVM verification plan using the following EXACT structure for each test case:
 
 ### Test Case: TEST_NAME
 - **Test Category:** (e.g., AXI Interface, CSR Access, Interrupts, Cache Coherency)

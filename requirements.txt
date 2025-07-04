@@ -4,3 +4,4 @@ chromadb
 pandas
 PyMuPDF
 Pillow
+openpyxl

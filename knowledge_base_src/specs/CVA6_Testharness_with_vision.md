@@ -32,59 +32,44 @@ names and
 
 **AI Vision Analysis:**
 
-**CVA6 Testharness Diagram Analysis**
+**CVA6 Testharness Block Diagram Analysis**
 
 ### 1. Type of Diagram
 The diagram is a **block diagram**, illustrating the interconnections between various components within the CVA6 Testharness module.
 
 ### 2. Key Components, Signals, Interfaces, or Data Structures
 The diagram showcases the following key components and interfaces:
-- **Masters:**
-  - `ariane` (connected to `slave[0]`)
-  - `debug` (connected to `slave[1]`)
-- **Slaves:**
-  - `DRAM`
-  - `GPIO`
-  - `Ethernet` (not directly shown but mentioned in the context)
-  - Other slaves include `CLINT`, `ROM`, and several peripherals within the `ariane_peripherals` block.
-- **Interfaces:**
-  - AXI (Advanced eXtensible Interface) for masters and slaves.
-  - APB (Advanced Peripheral Bus) for peripherals.
-  - DEBUG interface for `dm_top`.
-- **Key Components:**
-  - `axi_bar`: The AXI crossbar that connects masters to slaves.
-  - `ariane_peripherals`: A block containing various peripherals such as `xlnx_axi_quad_spi`, `apb_timer`, `plic_top`, and `apb_uart`.
+- **Masters and Slaves**: Two masters (`ariane` and `debug`) and multiple slaves (e.g., `DRAM`, `GPIO`, `Ethernet`, etc.) are connected through an **AXI crossbar**.
+- **Interfaces**: The diagram highlights various interfaces, including AXI, APB, PLIC, and DEBUG, which are used for communication between masters and slaves.
+- **Converters and Adapters**: Components like `axi_adapter`, `axi2apb_64_32`, and `xlnx_axi_clock_converter` facilitate data transfer between different interfaces.
 
 ### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
-The diagram does not directly show register layouts, bit fields, or memory maps. However, it implies the existence of these within the various peripherals and slaves (e.g., `apb_timer`, `apb_uart`, `plic_top`).
+The diagram does not explicitly show register layouts, bit fields, or memory maps. However, it implies the existence of these structures within the components, such as the `apb_timer` and `plic_top`, which are likely to have specific register configurations.
 
 ### 4. Timing Relationships, Clock Domains, or Signal Dependencies
-- The diagram suggests multiple clock domains due to the presence of clock converters (`xlnx_axi_clock_converter`).
-- Signal dependencies are evident through the interconnections between masters, slaves, and peripherals via the `axi_bar` and other interfaces.
+The diagram suggests the presence of multiple clock domains, as indicated by the `xlnx_axi_clock_converter`. The timing relationships between signals are not explicitly shown but can be inferred from the connections between components.
 
 ### 5. State Transitions, Control Flow, or Operational Modes
-The diagram does not explicitly show state transitions or control flow. However, it implies different operational modes based on the configuration and interaction between masters and slaves.
+The diagram does not directly illustrate state transitions or control flow. However, it implies that the components operate in various modes based on the interfaces and signals used.
 
 ### 6. Pin Assignments, Interconnections, or Bus Structures
-- The diagram illustrates the interconnections between components using various buses (AXI, APB).
-- Pin assignments are not explicitly shown but are implied through the connections between blocks.
+The diagram highlights the interconnections between components, including:
+- **AXI Crossbar**: The central component that connects masters and slaves.
+- **Bus Structures**: The diagram shows various bus structures, such as AXI and APB, used for data transfer between components.
 
 ### 7. Numerical Values, Specifications, or Technical Parameters
-- The diagram mentions specific interfaces and configurations (e.g., `axi2apb_64_32`, `master[0]`, `slave[1]`).
-- Numerical values are not directly visible but are referenced in the component names and interfaces.
+The diagram does not provide explicit numerical values or technical parameters. However, the component names and interfaces suggest specific configurations, such as the `64_32` in `axi2apb_64_32`, indicating a conversion from a 64-bit to a 32-bit interface.
 
 ### 8. Text Labels, Signal Names, or Annotations
-- Text labels are used to identify components (`ariane`, `debug`, `DRAM`, `GPIO`, etc.).
-- Signal names are shown for the interfaces between components (`req`, `gnt`, `rvfi`, etc.).
+The diagram includes text labels for components, interfaces, and signals, such as `ariane`, `debug`, `master[0]`, and `slave[1]`. These labels provide context for understanding the connections and functionality of the components.
 
 ### 9. Relation to ASIC Verification and Testing Requirements
-The CVA6 Testharness diagram is crucial for ASIC verification and testing as it:
-- Illustrates the integration of various components and their interfaces.
-- Helps in understanding the data flow and control flow within the system.
-- Facilitates the identification of potential test points and verification requirements.
-- Supports the development of testbenches and verification environments by highlighting the interactions between masters and slaves.
+The CVA6 Testharness block diagram is crucial for ASIC verification and testing, as it:
+- **Illustrates the System Architecture**: The diagram provides a comprehensive view of the system's components and their interconnections.
+- **Facilitates Testbench Development**: Understanding the connections and interfaces between components is essential for developing effective testbenches.
+- **Enables Verification Planning**: The diagram helps identify key components and interfaces that require verification, ensuring that the ASIC meets its functional and performance requirements.
 
-This analysis provides a comprehensive overview of the CVA6 Testharness diagram, highlighting its key components, interfaces, and implications for ASIC verification and testing.
+In summary, the CVA6 Testharness block diagram is a critical component of the ASIC verification and testing process, providing a detailed illustration of the system's architecture and facilitating the development of effective testbenches and verification plans.
 
 ---
 
@@ -107,47 +92,9 @@ The following is the diagram of the `ariane` module
 
 **AI Vision Analysis:**
 
-**Technical Description of the `ariane` Module Diagram**
+**Technical Description of the Diagram**
 
-### 1. Type of Diagram
-The provided image is a **block diagram**, illustrating the `ariane` module and its input/output ports.
 
-### 2. Key Components, Signals, Interfaces, or Data Structures Shown
-The diagram depicts the `ariane` core instantiated as `i_ariane` within the `ariane_testharness` module. The key components and interfaces visible include:
-- The `ariane` module itself
-- Input signals: `ipi`, `irq`, and `time_irq`
-- AXI request and response signals between `ariane_testharness` and `ariane`
-
-### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
-The diagram does not explicitly show register layouts, bit fields, memory maps, or address spaces. However, it implies the presence of these elements within the `ariane` module and its interfaces.
-
-### 4. Timing Relationships, Clock Domains, or Signal Dependencies
-The diagram does not directly illustrate timing relationships or clock domains. However, it suggests that the `ariane` module operates based on the inputs it receives from the `ariane_testharness` module, indicating potential signal dependencies.
-
-### 5. State Transitions, Control Flow, or Operational Modes
-The diagram does not provide explicit information on state transitions, control flow, or operational modes of the `ariane` module. It focuses on the module's external interfaces rather than its internal operation.
-
-### 6. Pin Assignments, Interconnections, or Bus Structures
-The diagram highlights the interconnections between the `ariane_testharness` and `ariane` modules, specifically:
-- Input signals (`ipi`, `irq`, `time_irq`) from `ariane_testharness` to `ariane`
-- AXI request and response signals between the two modules
-
-### 7. Numerical Values, Specifications, or Technical Parameters
-No specific numerical values or technical parameters are visible in the provided diagram.
-
-### 8. Text Labels, Signal Names, or Annotations
-The diagram contains the following text labels and signal names:
-- The module name: `ariane`
-- Input signals: `ipi`, `irq`, and `time_irq`
-- Reference to AXI request and response signals
-
-### 9. Relation to ASIC Verification and Testing Requirements
-This diagram is relevant to ASIC verification and testing as it:
-- Illustrates the external interfaces of the `ariane` core, which is crucial for understanding how to test and verify its functionality within the `ariane_testharness`.
-- Highlights the signals and interfaces that need to be controlled and monitored during testing.
-- Provides a basis for developing testbenches and verification plans that cover the interactions between `ariane_testharness` and `ariane`.
-
-In summary, the diagram serves as a foundational element for understanding the `ariane` module's integration within the `ariane_testharness` and guides the development of verification strategies for the ASIC.
 
 ---
 
@@ -171,49 +118,9 @@ are the following:
 
 **AI Vision Analysis:**
 
-## Technical Analysis of the Provided Image
+**Technical Description of the Diagram**
 
-### 1. Type of Diagram
-The image appears to be a simplified block diagram, focusing on a single component or module labeled "axi_adapter".
 
-### 2. Key Components, Signals, Interfaces, or Data Structures Shown
-- The primary component visible is the "axi_adapter".
-- No specific signals, interfaces, or data structures are directly shown in the image.
-
-### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
-The image does not provide any information regarding register layouts, bit fields, memory maps, or address spaces.
-
-### 4. Timing Relationships, Clock Domains, or Signal Dependencies
-No timing relationships, clock domains, or signal dependencies are visible in the provided image.
-
-### 5. State Transitions, Control Flow, or Operational Modes
-The image does not depict state transitions, control flow, or operational modes.
-
-### 6. Pin Assignments, Interconnections, or Bus Structures
-- The image lacks detailed pin assignments or interconnections.
-- It does not show any bus structures.
-
-### 7. Numerical Values, Specifications, or Technical Parameters
-No numerical values, specifications, or technical parameters are visible in the image.
-
-### 8. Text Labels, Signal Names, or Annotations
-- The text label "axi_adapter" is centered in the image.
-- No signal names or annotations are provided.
-
-### 9. Relation to ASIC Verification and Testing Requirements
-The "axi_adapter" is likely a crucial component in the ASIC design, possibly facilitating communication between different parts of the system or between the system and external components via the AXI (Advanced eXtensible Interface) protocol. The AXI protocol is a widely used standard for designing high-performance, high-frequency systems.
-
-Given the context from the page text:
-- The "axi_adapter" is involved in passing AXI request and response signals between the test_harness module and other components.
-- It interacts with the `dm_axi_m_req` and `dm_axi_m_resp` signals, which are linked with the Slave[1] AXI_BUS interface.
-- The AXI_BUS interface acts as a master for the axi_protocol, indicating that the "axi_adapter" plays a role in managing or translating AXI transactions.
-
-For ASIC verification and testing, understanding the functionality and interfaces of components like the "axi_adapter" is crucial. Verification engineers would need to:
-- Ensure that the "axi_adapter" correctly translates or manages AXI requests and responses.
-- Verify its interaction with other components, such as the test_harness module and the AXI_BUS interface.
-- Test its performance under various scenarios, including different transaction types, frequencies, and data widths.
-
-The absence of detailed information in the image suggests that it is part of a larger document or specification that provides a more comprehensive overview of the ASIC design and its verification requirements.
 
 ---
 
@@ -243,49 +150,9 @@ Clint is a slave in this SoC. The signals of the `clint` module are as follows:
 
 **AI Vision Analysis:**
 
-**Technical Description of the Diagram**
+**Technical Description: AXI2MEM Block Diagram**
 
-### 1. Type of Diagram
-The diagram is a **block diagram**, illustrating the interaction between different components within a System-on-Chip (SoC).
 
-### 2. Key Components, Signals, Interfaces, or Data Structures Shown
-- The diagram highlights a component labeled **"axi2mem"**, which is connected to a **"Master"** interface.
-- The "axi2mem" block is likely an AXI (Advanced eXtensible Interface) to memory bridge, facilitating communication between an AXI master and memory.
-
-### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
-- The diagram does not explicitly show register layouts, bit fields, memory maps, or address spaces. However, it implies the presence of an AXI interface, which typically involves complex memory mapping and address space management.
-
-### 4. Timing Relationships, Clock Domains, or Signal Dependencies
-- The diagram does not provide explicit information on timing relationships, clock domains, or signal dependencies. However, in the context of AXI interfaces, it is understood that there are specific timing requirements and signal dependencies between the master and slave components.
-
-### 5. State Transitions, Control Flow, or Operational Modes
-- The diagram does not illustrate state transitions, control flow, or operational modes. It is a static representation of component interconnection.
-
-### 6. Pin Assignments, Interconnections, or Bus Structures
-- The diagram shows that the **"axi2mem"** component is connected to a **"Master"** interface, indicating a bus structure that likely follows the AXI protocol.
-- The connection implies that the "Master" interface is driving the "axi2mem" component, which in turn interacts with memory.
-
-### 7. Numerical Values, Specifications, or Technical Parameters
-- No numerical values or specific technical parameters are visible in the diagram.
-
-### 8. Text Labels, Signal Names, or Annotations
-- The diagram includes the text labels **"Master"** and **"axi2mem"**, indicating the components or interfaces involved.
-
-### 9. Relation to ASIC Verification and Testing Requirements
-- The diagram is relevant to ASIC verification and testing as it illustrates a critical component interaction within the SoC.
-- Verification engineers would need to ensure that the "axi2mem" component correctly translates AXI transactions into memory accesses, adhering to the AXI protocol and the specific memory interface requirements.
-- Testing would involve validating the functionality of the "axi2mem" component under various scenarios, including different AXI transaction types and memory access patterns.
-
-**Verification and Testing Implications**
-
-To verify and test the "axi2mem" component and its interaction with the "Master" interface, the following steps could be taken:
-
-1. **Develop Testbenches**: Create testbenches that simulate various AXI transactions from the "Master" interface to the "axi2mem" component.
-2. **Validate AXI Protocol Compliance**: Ensure that the "axi2mem" component adheres to the AXI protocol specifications, handling transactions correctly and responding appropriately to different AXI signals.
-3. **Memory Access Validation**: Verify that the "axi2mem" component correctly translates AXI transactions into memory accesses, checking for data integrity and correct addressing.
-4. **Edge Case Testing**: Test the component under edge cases, such as high transaction rates, different data widths, and various AXI transaction types (e.g., read, write, burst transactions).
-
-By following these steps, verification engineers can ensure that the "axi2mem" component functions correctly within the SoC, supporting reliable data transfer between the AXI master and memory.
 
 ---
 
@@ -317,41 +184,7 @@ Clint is a slave in this SoC. The signals of the `clint` module are as follows:
 
 **Technical Description of the Diagram**
 
-### 1. Type of Diagram
-The diagram is a **block diagram**, illustrating the hierarchical structure of a digital design within an Application-Specific Integrated Circuit (ASIC).
 
-### 2. Key Components, Signals, Interfaces, or Data Structures Shown
-- The diagram shows a top-level module named `dm_top`.
-- Inside `dm_top`, there is a submodule named `dm_mem`.
-- Two arrows indicate input and output interfaces or signals to/from `dm_mem`, suggesting data flow or communication with other components.
-
-### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
-The diagram does not explicitly show register layouts, bit fields, memory maps, or address spaces. However, the presence of `dm_mem` suggests that it could be related to memory management or storage within the ASIC.
-
-### 4. Timing Relationships, Clock Domains, or Signal Dependencies
-The diagram does not provide information on timing relationships, clock domains, or signal dependencies. It focuses on the structural hierarchy rather than temporal or causal relationships between signals.
-
-### 5. State Transitions, Control Flow, or Operational Modes
-There is no information on state transitions, control flow, or operational modes visible in the diagram. It is a static representation of the module hierarchy.
-
-### 6. Pin Assignments, Interconnections, or Bus Structures
-- The diagram illustrates the interconnection between `dm_top` and `dm_mem`, showing that `dm_mem` is a submodule of `dm_top`.
-- The input and output arrows suggest connections to other parts of the ASIC, but the specifics of these connections (e.g., bus structures) are not detailed.
-
-### 7. Numerical Values, Specifications, or Technical Parameters
-No numerical values, specifications, or technical parameters are visible in the diagram.
-
-### 8. Text Labels, Signal Names, or Annotations
-- The text labels visible are `dm_top` and `dm_mem`, indicating the names of the modules.
-- The arrows represent input and output signals or interfaces but do not specify their names or functions.
-
-### 9. Relation to ASIC Verification and Testing Requirements
-This diagram is relevant to ASIC verification and testing as it:
-- Provides a high-level view of the design hierarchy, which is crucial for understanding how different components interact.
-- Identifies key modules (`dm_top` and `dm_mem`) that may need to be tested or verified.
-- Suggests the need to verify the interfaces or signals represented by the input and output arrows, ensuring they function correctly according to the ASIC's specification.
-
-For verification engineers, this diagram serves as a starting point for understanding the ASIC's architecture and planning the verification strategy, particularly for the `dm_top` and `dm_mem` modules and their interactions.
 
 ---
 
@@ -381,52 +214,9 @@ Clint is a slave in this SoC. The signals of the `clint` module are as follows:
 
 **AI Vision Analysis:**
 
-**Technical Description of the CLINT Diagram**
+**Technical Description of the Diagram**
 
-### 1. Type of Diagram
-The provided image appears to be a block diagram or a module representation from an ASIC specification document, specifically highlighting the `clint` module.
 
-### 2. Key Components, Signals, Interfaces, or Data Structures
-- The `clint` module is identified as a slave in the SoC.
-- Key signals generated by the `clint` module:
-  - `ipi_o` (inter-processing interrupt)
-  - `timer_irq_o` (timer interrupt request)
-- These signals are inputs to the Ariane core.
-- The `clint` module interacts with the AXI bus interface.
-
-### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
-The image does not provide explicit details on register layouts, bit fields, memory maps, or address spaces. However, the text context mentions that the memory has been instantiated in the `dm_top` module, indicating a hierarchical structure.
-
-### 4. Timing Relationships, Clock Domains, or Signal Dependencies
-- The `clint` module generates `ipi_o` and `timer_irq_o`, which are inputs to the Ariane core. This implies a dependency between the `clint` module's outputs and the Ariane core's operation.
-- No specific timing relationships or clock domains are visible in the image.
-
-### 5. State Transitions, Control Flow, or Operational Modes
-The image does not directly show state transitions, control flow, or operational modes. However, the text context suggests that the `clint` module operates by generating interrupts based on certain conditions (e.g., timer interrupt).
-
-### 6. Pin Assignments, Interconnections, or Bus Structures
-- The `clint` module is connected to the AXI bus interface.
-- The assignments `AXI_ASSIGN_TO_REQ(axi_clint_req, master[ariane_soc:...` indicate how the `clint` module interacts with the AXI bus.
-
-### 7. Numerical Values, Specifications, or Technical Parameters
-No specific numerical values or technical parameters are visible in the image.
-
-### 8. Text Labels, Signal Names, or Annotations
-- The text label "clint" is visible in the image.
-- Signal names mentioned in the context: `ipi_o`, `timer_irq_o`, `axi_clint_req`.
-
-### 9. Relation to ASIC Verification and Testing Requirements
-The `clint` module's functionality and its interaction with the Ariane core and AXI bus interface are crucial for ASIC verification and testing. Verification engineers need to ensure that:
-- The `clint` module generates `ipi_o` and `timer_irq_o` correctly under various conditions.
-- The interaction between the `clint` module and the AXI bus interface is properly implemented.
-- The `clint` module's outputs are correctly received and processed by the Ariane core.
-
-To verify the `clint` module, engineers may need to:
-- Test the generation of `ipi_o` and `timer_irq_o` under different scenarios.
-- Validate the AXI bus interface assignments and the module's response to various inputs.
-- Ensure that the `clint` module operates correctly in the context of the overall SoC.
-
-This technical description provides a foundation for understanding the `clint` module's role and its verification requirements within the ASIC.
 
 ---
 
@@ -449,49 +239,9 @@ module) from the
 
 **AI Vision Analysis:**
 
-**Technical Description of Bootrom Diagram**
+**Technical Description of the Diagram**
 
-### 1. Type of Diagram
-The diagram is a block diagram illustrating the interface between the `axi2mem` module and the `bootrom` module.
 
-### 2. Key Components, Signals, Interfaces, or Data Structures
-- The `axi2mem` module is used to facilitate communication with the `bootrom` module.
-- The `bootrom` module is a memory component pre-initialized with a size defined by `ROM_SIZE = 186`.
-
-### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
-- The diagram does not explicitly show register layouts, bit fields, or memory maps. However, it is mentioned that the `bootrom` is pre-initialized with a specific size (`ROM_SIZE = 186`), indicating a defined memory allocation.
-
-### 4. Timing Relationships, Clock Domains, or Signal Dependencies
-- The diagram does not provide explicit information on timing relationships, clock domains, or signal dependencies. However, the interaction between `axi2mem` and `bootrom` implies a dependency on AXI protocol signals and potentially a shared clock domain.
-
-### 5. State Transitions, Control Flow, or Operational Modes
-- The diagram does not illustrate state transitions, control flow, or operational modes directly. The context suggests that the `bootrom` is accessed through the `axi2mem` module, implying a read-only or initialization mode for the bootrom.
-
-### 6. Pin Assignments, Interconnections, or Bus Structures
-- The diagram shows the signals of the memory interface between `axi2mem` and `bootrom`. Although the specific signals are not detailed in the provided text, the context implies an AXI bus structure for the interface.
-
-### 7. Numerical Values, Specifications, or Technical Parameters
-- `ROM_SIZE = 186`: This is a key parameter defining the size of the `bootrom`.
-
-### 8. Text Labels, Signal Names, or Annotations
-- The diagram is labeled as "bootrom" and is associated with the `axi2mem` module.
-- Signal names are not explicitly listed in the provided text but are implied to be part of the AXI interface.
-
-### 9. Relation to ASIC Verification and Testing Requirements
-- The `bootrom` and its interface with `axi2mem` are critical components for ASIC verification. Verification engineers need to ensure that the `bootrom` is correctly initialized and that the AXI interface functions as expected.
-- Testing requirements may include verifying the correct operation of the `axi2mem` module in accessing the `bootrom`, checking for correct data retrieval, and ensuring that the `bootrom` size is correctly configured and utilized.
-
-**Verification Tasks:**
-
-1. Verify the correct initialization of `bootrom` with the specified `ROM_SIZE`.
-2. Test the AXI interface between `axi2mem` and `bootrom` for correct data transfer.
-3. Ensure that the `axi2mem` module correctly handles AXI protocol signals for `bootrom` access.
-
-**Testing Strategies:**
-
-1. Use AXI protocol checkers to verify the correctness of the AXI interface.
-2. Perform memory access tests to ensure that data is correctly retrieved from the `bootrom`.
-3. Validate the `ROM_SIZE` parameter and its impact on the system's operation.
 
 ---
 
@@ -516,53 +266,57 @@ The slave modport of AXI_BUS interface for `Master[DRAM]` has been linked with
 **Technical Description of the Diagram**
 
 ### 1. Type of Diagram
-The diagram is a **block diagram**, illustrating the interconnection of various modules and interfaces within a digital system, specifically related to memory access and AXI (Advanced eXtensible Interface) protocol.
+The diagram is a **block diagram**, illustrating the interconnection of various modules and interfaces within a digital system, specifically an ASIC (Application-Specific Integrated Circuit) design.
 
 ### 2. Key Components, Signals, Interfaces, or Data Structures Shown
-- **Master[DRAM]**: The master module initiating memory access requests.
-- **axi_riscv_atomics**: A module handling atomic operations for RISC-V architecture.
-- **dram** and **dram_delayed**: Two AXI_BUS interfaces representing different stages of memory access requests.
-- **axi_delayer_intf**: A module that introduces a delay in the AXI interface.
-- **axi_2mem**: A module converting AXI interface to memory interface.
-- **sram**: Static Random Access Memory, the target memory for the AXI requests.
-- **Signals/Interfaces**:
-  - **rdata**: Read data from SRAM to axi_2mem.
-  - **wdata**: Write data from axi_2mem to SRAM.
-  - **req**: Request signal from axi_2mem to SRAM.
+- **Master[DRAM]**: The master module connected to the DRAM interface.
+- **axi_riscv_atomics**: A module that handles atomic operations for the AXI (Advanced eXtensible Interface) bus.
+- **dram** and **dram_delayed**: Two AXI_BUS interfaces, with **dram_delayed** being a delayed version of **dram**.
+- **axi_delayer_intf**: A module that introduces a delay between the **dram** and **dram_delayed** interfaces.
+- **axi_2mem**: A module that converts AXI transactions to memory operations.
+- **sram**: A Static Random Access Memory module, representing the memory component.
 
 ### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
-Not visible in this diagram. The focus is on the interconnection and data flow rather than the internal structure of the memory or registers.
+Not explicitly visible in the diagram. However, the presence of **sram** indicates that there is a memory component involved.
 
 ### 4. Timing Relationships, Clock Domains, or Signal Dependencies
-- The diagram implies a sequential dependency where the output of one module is the input to the next.
-- **dram_delayed** is a delayed version of **dram**, indicating a timing relationship introduced by **axi_delayer_intf**.
-- The exact clock domains are not specified, but it is implied that the modules are synchronized to a common clock or that appropriate clock domain crossing mechanisms are in place.
+- The diagram implies a timing relationship between **dram** and **dram_delayed**, with **dram_delayed** being a delayed version of **dram**, suggesting a dependency in their timing.
+- The **axi_delayer_intf** module is responsible for introducing this delay.
 
 ### 5. State Transitions, Control Flow, or Operational Modes
-The diagram does not directly show state transitions or control flow. However, it implies a data flow from **Master[DRAM]** to **sram** through various AXI interfaces and conversion modules.
+Not explicitly shown in the diagram. However, the flow from **Master[DRAM]** to **sram** indicates a sequence of operations or data flow.
 
 ### 6. Pin Assignments, Interconnections, or Bus Structures
-- The diagram shows the interconnection between different modules and interfaces.
-- **AXI_BUS** is used as the interface protocol between modules.
-- The interconnections imply a bus structure for data and control signals.
+- The diagram shows the interconnection between various modules and interfaces:
+  - **Master[DRAM]** is connected to **axi_riscv_atomics**.
+  - **axi_riscv_atomics** is connected to **dram**.
+  - **dram** is connected to **axi_delayer_intf** (as a slave modport).
+  - **axi_delayer_intf** is connected to **dram_delayed** (as a master modport).
+  - **dram_delayed** is connected to **axi_2mem**.
+  - **axi_2mem** is connected to **sram** with signals **rdata**, **wdata**, and **req**.
 
 ### 7. Numerical Values, Specifications, or Technical Parameters
-Not explicitly mentioned in the diagram. However, the context suggests that the system is designed for exclusive accesses without burst support.
+Not visible in the diagram.
 
 ### 8. Text Labels, Signal Names, or Annotations Visible in the Image
-- Module names: **Master[DRAM]**, **axi_riscv_atomics**, **axi_delayer_intf**, **axi_2mem**, **sram**.
-- Interface names: **dram**, **dram_delayed**.
-- Signal names: **rdata**, **wdata**, **req**.
+- **Master[DRAM]**
+- **axi_riscv_atomics**
+- **dram**
+- **axi_delayer_intf**
+- **dram_delayed**
+- **axi_2mem**
+- **sram**
+- **rdata**, **wdata**, **req** (signals between **axi_2mem** and **sram**)
 
 ### 9. Relation to ASIC Verification and Testing Requirements
-This diagram is crucial for ASIC verification as it outlines the data path and control flow for memory access. Verification engineers can use this to:
-- Identify key components and interfaces that need to be tested.
-- Understand the timing and data dependencies between different modules.
-- Develop test cases that cover the functionality of each module and their interconnections.
-- Ensure that the AXI protocol is correctly implemented and that data is correctly transferred between modules.
-- Validate the exclusive access mechanism and the absence of burst support.
+This diagram is crucial for ASIC verification and testing as it outlines the interconnections and data flow between different components of the ASIC. Verification engineers can use this diagram to:
+- Understand the system's architecture and identify potential bottlenecks or areas of concern.
+- Develop testbenches that cover the interactions between the **Master[DRAM]**, **axi_riscv_atomics**, **axi_delayer_intf**, **axi_2mem**, and **sram**.
+- Verify the correct functioning of the delay introduced by **axi_delayer_intf** and its impact on the overall system.
+- Test the AXI bus transactions and the conversion to memory operations by **axi_2mem**.
+- Ensure that the **sram** is correctly accessed and that data is properly read and written.
 
-In summary, this block diagram provides a critical overview of the system's architecture related to memory access, highlighting the interconnections and data flow between various modules. It serves as a foundational document for understanding the system's functionality and for guiding the verification and testing process.
+By analyzing this diagram, verification engineers can create comprehensive test plans to ensure the ASIC functions as intended.
 
 ---
 
@@ -621,36 +375,45 @@ and `rx` for tr
 **Technical Description of the Diagram**
 
 ### 1. Type of Diagram
-The diagram is a block diagram, specifically illustrating the `apb_uart` module and its connections within the `ariane_testharness`.
+The diagram is a block diagram, specifically illustrating the `apb_uart` module within the context of the CVA6_Testharness.
 
 ### 2. Key Components, Signals, Interfaces, or Data Structures Shown
-- The `apb_uart` module is the primary component.
-- Two key signals associated with the `apb_uart` module are mentioned: `tx` (transmit) and `rx` (receive).
-- The `axi2apb_64_32` module is used to convert AXI protocol signals to APB signals, facilitating communication between the AXI_BUS and the `apb_uart` module.
+- The `apb_uart` module is the central component.
+- The `axi2apb_64_32` module is used to convert AXI protocol signals to APB signals.
+- Key signals mentioned include `tx` and `rx` for transmitting and receiving data.
 
 ### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
 Not visible in the provided image. The diagram does not display register layouts, bit fields, memory maps, or address spaces.
 
 ### 4. Timing Relationships, Clock Domains, or Signal Dependencies
-- The diagram implies a timing relationship between the AXI_BUS signals and the APB signals used by the `apb_uart` module, mediated by the `axi2apb_64_32` module.
-- The `tx` and `rx` signals indicate a dependency between the data transmission and reception operations.
+- The diagram implies a timing relationship between the AXI bus signals and the APB signals due to the presence of the `axi2apb_64_32` module.
+- The `tx` and `rx` signals are dependent on the data being transmitted or received by the `apb_uart` module.
 
 ### 5. State Transitions, Control Flow, or Operational Modes
-Not explicitly shown in the diagram. However, the presence of `tx` and `rx` signals suggests that the `apb_uart` module operates in a manner that involves transmitting and receiving data, potentially with different operational modes or states (e.g., idle, transmitting, receiving).
+Not explicitly shown in the diagram. However, the `apb_uart` module likely involves state transitions related to data transmission and reception.
 
 ### 6. Pin Assignments, Interconnections, or Bus Structures
-- The diagram illustrates the interconnection between the AXI_BUS, the `axi2apb_64_32` module, and the `apb_uart` module.
-- The `apb_uart` module is connected to the AXI_BUS via the `axi2apb_64_32` module, indicating a bus structure that facilitates communication between these components.
+- The `apb_uart` module is connected to the AXI bus through the `axi2apb_64_32` module.
+- The `tx` and `rx` signals are connected to external interfaces for data transmission and reception.
 
 ### 7. Numerical Values, Specifications, or Technical Parameters
-- The diagram references a 64-bit to 32-bit conversion in the `axi2apb_64_32` module, indicating specific technical parameters related to the data width conversion.
+- The diagram mentions "64_32" in the `axi2apb_64_32` module, indicating a conversion between 64-bit and 32-bit data widths.
 
 ### 8. Text Labels, Signal Names, or Annotations Visible in the Image
-- The text label "apb_uart" is visible within the diagram.
-- Signal names `tx` and `rx` are mentioned in the context, though not directly visible in the image.
+- The text label "apb_uart" is visible within the block diagram.
 
 ### 9. Relation to ASIC Verification and Testing Requirements
-The `apb_uart` module and its connections are relevant to ASIC verification and testing because they represent a critical component for communication and data transfer within the `ariane_testharness`. Verifying the correct operation of the `apb_uart` module, including its interaction with the AXI_BUS via the `axi2apb_64_32` module, is essential for ensuring the overall functionality and reliability of the ASIC. Testing requirements would include validating the transmission and reception of data through the `tx` and `rx` signals, as well as ensuring proper protocol conversion by the `axi2apb_64_32` module.
+The `apb_uart` module and its integration with the AXI bus via the `axi2apb_64_32` module are crucial for ASIC verification and testing. Verification engineers need to ensure that:
+- The `apb_uart` module correctly transmits and receives data.
+- The `axi2apb_64_32` module properly converts AXI signals to APB signals.
+- The integration of these modules does not introduce any timing or signal integrity issues.
+
+Testing requirements may include:
+- Verifying the `tx` and `rx` signal functionality.
+- Ensuring correct data transmission and reception.
+- Validating the `axi2apb_64_32` conversion module's functionality.
+
+This technical description provides a structured overview of the `apb_uart` module's integration within the CVA6_Testharness, highlighting key components, interfaces, and potential verification and testing requirements.
 
 ---
 
@@ -676,7 +439,45 @@ plic_top module is as follows:
 
 **Technical Description of the Diagram**
 
+### 1. Type of Diagram
+The diagram is a **block diagram**, specifically illustrating the `plic_top` module within the context of the CVA6_Testharness ASIC specification.
 
+### 2. Key Components, Signals, Interfaces, or Data Structures Shown
+- The diagram centers around the `plic_top` module.
+- Interfaces and signals related to the `plic_top` module are shown, including:
+  - `reg_bus` interface, which is used for communication with the `plic_top` module.
+  - APB (Advanced Peripheral Bus) signals, which are converted from AXI signals using the `axi2apb_64_32` module.
+  - Signals from the `apb_to_reg` module, which assigns APB signals to the `reg_bus` interface.
+
+### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
+The diagram does not explicitly show register layouts, bit fields, memory maps, or address spaces. However, it implies that the `plic_top` module is accessed through the `reg_bus` interface, suggesting that there are registers within `plic_top` that are mapped to specific addresses.
+
+### 4. Timing Relationships, Clock Domains, or Signal Dependencies
+- The diagram suggests a dependency between APB signals (`psel` and `penable`) and the `valid` signal of the `reg_bus` interface, as the `valid` signal is generated by a logical AND operation between `psel` and `penable`.
+- The conversion from AXI to APB signals using `axi2apb_64_32` implies a clock domain crossing or adaptation, but the specifics are not detailed in the diagram.
+
+### 5. State Transitions, Control Flow, or Operational Modes
+The diagram does not directly illustrate state transitions, control flow, or operational modes. However, it implies that the `plic_top` module operates based on the signals received through the `reg_bus` interface, which is controlled by APB signals.
+
+### 6. Pin Assignments, Interconnections, or Bus Structures
+- The diagram shows the interconnection between `axi2apb_64_32`, `apb_to_reg`, and `plic_top` modules.
+- The `reg_bus` interface is a key interconnection between `apb_to_reg` and `plic_top`.
+
+### 7. Numerical Values, Specifications, or Technical Parameters
+No specific numerical values or technical parameters are visible in the diagram.
+
+### 8. Text Labels, Signal Names, or Annotations
+- The diagram contains the text label "plic_top".
+- Signal names and annotations related to APB and `reg_bus` interfaces are implied but not directly visible in the provided image.
+
+### 9. Relation to ASIC Verification and Testing Requirements
+The diagram is relevant to ASIC verification and testing as it illustrates the integration and communication pathway to the `plic_top` module, a critical component within the CVA6_Testharness. Verification engineers can use this information to:
+- Understand the signal flow and dependencies affecting `plic_top`.
+- Develop testbenches that correctly interact with `plic_top` through the `reg_bus` interface.
+- Validate the conversion and handling of AXI to APB signals.
+- Ensure that the `plic_top` module is properly accessed and controlled during testing.
+
+This technical description provides a foundation for verification engineers to develop comprehensive test plans and verify the functionality of the `plic_top` module within the ASIC.
 
 ---
 
@@ -702,7 +503,45 @@ plic_top module is as follows:
 
 **Technical Description of the Diagram**
 
+### 1. Type of Diagram
+The diagram is a **block diagram**, illustrating the hierarchical structure and interconnections between various modules in a System-on-Chip (SoC) design, specifically focusing on the path to the `plic_top` module.
 
+### 2. Key Components, Signals, Interfaces, or Data Structures Shown
+- **Master[PLIC]**: The master module initiating the request, likely related to the Platform-Level Interrupt Controller (PLIC).
+- **axi2apb_64_32**: A module converting AXI (Advanced eXtensible Interface) signals to APB (Advanced Peripheral Bus) signals, indicating a bus protocol conversion.
+- **apb_to_reg**: A module that assigns APB signals to the `reg_bus` interface, facilitating communication with the `plic_top` module.
+- **reg_bus**: An interface that communicates with the `plic_top` module, likely a register-level interface.
+- **plic_top**: The top-level module of the PLIC, which is a slave in this SoC.
+
+### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
+Not directly visible in the diagram. However, the presence of `reg_bus` suggests interaction with registers or memory-mapped addresses within `plic_top`.
+
+### 4. Timing Relationships, Clock Domains, or Signal Dependencies
+- The diagram implies a sequential dependency where the output of one module is the input to the next (`Master[PLIC]` -> `axi2apb_64_32` -> `apb_to_reg` -> `plic_top`).
+- The `apb_to_reg` module generates a `valid` signal for `reg_bus` based on the logical AND of `psel` and `penable` signals from the APB protocol, indicating a timing dependency on these signals.
+
+### 5. State Transitions, Control Flow, or Operational Modes
+Not explicitly shown in the diagram. However, the conversion from AXI to APB and the generation of a `valid` signal suggest specific operational modes or states (e.g., enabled or disabled based on `psel` and `penable`).
+
+### 6. Pin Assignments, Interconnections, or Bus Structures
+- The diagram shows a hierarchical interconnection between modules: `Master[PLIC]` is connected to `axi2apb_64_32`, which is connected to `apb_to_reg`, and finally to `plic_top`.
+- The bus structures involved include AXI and APB, with `reg_bus` being another interface or bus structure.
+
+### 7. Numerical Values, Specifications, or Technical Parameters
+- The module `axi2apb_64_32` suggests a conversion involving 64-bit and 32-bit data widths, indicating specific technical parameters related to data width.
+
+### 8. Text Labels, Signal Names, or Annotations Visible in the Image
+- Labels include module names (`axi2apb_64_32`, `apb_to_reg`, `plic_top`) and interface names (`reg_bus`).
+- Signal names mentioned in the context include `psel`, `penable`, and `valid`.
+
+### 9. Relation to ASIC Verification and Testing Requirements
+This diagram is crucial for ASIC verification as it outlines the path and interfaces through which the PLIC is accessed. Verification engineers need to ensure that:
+- The AXI to APB conversion is correctly implemented.
+- The `apb_to_reg` module correctly generates the `valid` signal and assigns APB signals to `reg_bus`.
+- The `plic_top` module functions as expected when accessed through `reg_bus`.
+- The timing dependencies and signal relationships are correctly managed across the different modules and interfaces.
+
+This diagram provides a foundational understanding of the SoC's architecture related to the PLIC, guiding the development of testbenches and verification plans for the ASIC.
 
 ---
 
@@ -731,7 +570,41 @@ Ethernet support
 
 **Technical Description of the Diagram**
 
+### 1. Type of Diagram
+The diagram is a **block diagram**, illustrating the structure and interconnections of a specific module within the CVA6_Testharness.
 
+### 2. Key Components, Signals, Interfaces, or Data Structures Shown
+The diagram centers around the `apb_timer` module. The key components and interfaces visible are:
+- `apb_timer`: The central module, likely implementing a timer functionality.
+- `apb_timer_req` and `apb_timer_resp`: These represent the request and response signals/interfaces of the APB (Advanced Peripheral Bus) protocol used for communication with the `apb_timer` module.
+
+### 3. Register Layouts, Bit Fields, Memory Maps, or Address Spaces
+The diagram does not explicitly show register layouts, bit fields, memory maps, or address spaces. However, it implies that the `apb_timer` module is accessed through the APB protocol, which typically involves registers.
+
+### 4. Timing Relationships, Clock Domains, or Signal Dependencies
+The diagram does not directly illustrate timing relationships or clock domains. However, it is implied that the `apb_timer_req` and `apb_timer_resp` signals are synchronized with a clock, as is typical in synchronous digital designs. The response (`apb_timer_resp`) is likely dependent on the request (`apb_timer_req`).
+
+### 5. State Transitions, Control Flow, or Operational Modes
+The diagram does not explicitly depict state transitions, control flow, or operational modes of the `apb_timer`. However, the presence of request and response signals suggests that the module operates based on the inputs it receives.
+
+### 6. Pin Assignments, Interconnections, or Bus Structures
+The diagram shows the interconnection between the master (likely the CVA6 processor or another master component) and the `apb_timer` module through the APB protocol. The `apb_timer_req` and `apb_timer_resp` signals represent the bus structure used for this communication.
+
+### 7. Numerical Values, Specifications, or Technical Parameters
+No specific numerical values or technical parameters are visible in the diagram. However, the context mentions a specific error response (`axi_pkg::RESP_SLVERR`) used by the Ethernet module, indicating a slave error.
+
+### 8. Text Labels, Signal Names, or Annotations Visible in the Image
+The visible text labels are:
+- `apb_timer`: The name of the module.
+- `apb_timer_req` and `apb_timer_resp`: The names of the request and response signals/interfaces.
+
+### 9. Relation to ASIC Verification and Testing Requirements
+This diagram is relevant to ASIC verification and testing as it illustrates how the `apb_timer` module is integrated into the CVA6_Testharness and how it communicates with other components. Verification engineers can use this information to:
+- Understand the expected behavior of the `apb_timer` module in response to APB requests.
+- Develop test cases that cover the interaction between the master and the `apb_timer` module.
+- Verify that the `apb_timer` module correctly handles various APB transactions and responds appropriately.
+
+In the context of the provided page text, the diagram supports the understanding that other modules, like Ethernet (not shown in this diagram), are also part of the testharness and may return specific error responses to APB requests, aiding in the verification of error handling and slave error responses.
 
 ---
 

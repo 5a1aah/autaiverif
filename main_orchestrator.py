@@ -57,28 +57,32 @@ def main():
     # Add environment configuration arguments
     parser.add_argument('--openrouter-key', 
                       type=str, 
-                      default=os.getenv('OPENROUTER_API_KEY', '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'),
+                      default=os.getenv('OPENROUTER_API_KEY', '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'),
                       help='OpenRouter API key (default: env var or hardcoded)')
     parser.add_argument('--llm-model',
                       type=str, 
                       default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
-                      help='LLM model name (default: env var or hardcoded)')
+                      help='LLM model name (default: env var or hardcoded)')    
+    subparsers = parser.add_subparsers(dest="command", help="Available commands", required=False)
 
-    # Check if GUI mode is requested before parsing subcommands
-    # This allows --gui to work without requiring a subcommand
-    temp_args, _ = parser.parse_known_args()
-    if temp_args.gui:
-        launch_gui()
-        return
-
-    subparsers = parser.add_subparsers(dest="command", help="Available commands", required=True)
+    # Add test_connection subparser
+    parser_test_connection = subparsers.add_parser("test_connection", help="Test API connection and authentication.")
+    parser_test_connection.add_argument('--openrouter-key', 
+                                      type=str, 
+                                      default=os.getenv('OPENROUTER_API_KEY', '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'),
+                                      help='OpenRouter API key (default: env var or hardcoded)')
+    parser_test_connection.add_argument('--llm-model',
+                                      type=str, 
+                                      default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
+                                      help='LLM model name (default: env var or hardcoded)')
+    parser_test_connection.set_defaults(func=handle_test_connection)
 
     # Add populate_kb subparser
     parser_populate = subparsers.add_parser("populate_kb", help="Process source documents and populate the RAG knowledge base.")
     # Add API configuration arguments for consistency (though populate_kb doesn't use LLM)
     parser_populate.add_argument('--openrouter-key', 
                               type=str, 
-                              default=os.getenv('OPENROUTER_API_KEY', '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'),
+                              default=os.getenv('OPENROUTER_API_KEY', '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'),
                               help='OpenRouter API key (default: env var or hardcoded)')
     parser_populate.add_argument('--llm-model',
                               type=str, 
@@ -89,7 +93,7 @@ def main():
     # Update command handlers to use these configurations
     def handle_generate_all(args):
         common_utils.OPENROUTER_API_KEY = args.openrouter_key
-        common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.deepseek_model
+        common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.llm_model
         if not args.spec_files and not args.features_file:
             print("Error: You must provide either --spec_files or --features_file for generate_all.")
             return
@@ -157,21 +161,20 @@ def main():
             print(f"\\nIndividual artifact generation completed. Summary:")
             print(f"  - Total Features Processed: {results.get('total_features', 'N/A')}")
             print(f"  - Successful Plans: {results.get('successful_plans', 'N/A')}")
-            print(f"  - Successful Test Sets: {results.get('successful_tests', 'N/A')}") # Assuming this counts sets of tests
-            print(f"  - Successful Excel Reports: {results.get('successful_excel', 'N/A')}")
+            print(f"  - Successful Test Sets: {results.get('successful_tests', 'N/A')}") # Assuming this counts sets of tests            print(f"  - Successful Excel Reports: {results.get('successful_excel', 'N/A')}")
             if results.get('failed_features'):
                 print(f"  - Failed Features: {len(results['failed_features'])}")
                 # for failed in results['failed_features'][:3]: # Sample of failed features
-                #     print(f"    - {failed.get('name', 'Unknown Feature')}: {failed.get('error', 'Unknown Error')}")            print(f"  Check the directory \'{args.output_dir}\' for detailed outputs and summary report.")
-
+                #     print(f"    - {failed.get('name', 'Unknown Feature')}: {failed.get('error', 'Unknown Error')}")
+            print(f"  Check the directory \'{args.output_dir}\' for detailed outputs and summary report.")# --- Add new subparser for plan generation ---
     parser_gen_plan = subparsers.add_parser("gen_plan", help="Generate a verification plan for an ASIC feature.")
-    parser_gen_plan.add_argument("feature_description", type=str, help="Description of the ASIC feature.")
+    parser_gen_plan.add_argument("--feature", required=True, type=str, help="Description of the ASIC feature.")
     parser_gen_plan.add_argument("--spec_file", type=str, help="Optional: Path to a specific ASIC specification file to use as primary context.")
     parser_gen_plan.add_argument("--addr_map_file", type=str, help="Optional: Path to a specific address map file to use as primary context.")
     # Add API configuration arguments
     parser_gen_plan.add_argument('--openrouter-key', 
                               type=str, 
-                              default=os.getenv('OPENROUTER_API_KEY', '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'),                              
+                              default=os.getenv('OPENROUTER_API_KEY', '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'),                              
                               help='OpenRouter API key (default: env var or hardcoded)')
     parser_gen_plan.add_argument('--llm-model',
                               type=str, 
@@ -187,15 +190,13 @@ def main():
     # Add API configuration arguments
     parser_gen_tests.add_argument('--openrouter-key', 
                               type=str, 
-                              default=os.getenv('OPENROUTER_API_KEY', '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'),
+                              default=os.getenv('OPENROUTER_API_KEY', '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'),
                               help='OpenRouter API key (default: env var or hardcoded)')
     parser_gen_tests.add_argument('--llm-model',
                               type=str, 
                               default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
                               help='LLM model name (default: env var or hardcoded)')
-    parser_gen_tests.set_defaults(func=handle_gen_tests)
-
-    # --- Add new subparser for plan_to_excel ---
+    parser_gen_tests.set_defaults(func=handle_gen_tests)    # --- Add new subparser for plan_to_excel ---
     parser_plan_to_excel = subparsers.add_parser("plan_to_excel", help="Convert a Markdown verification plan to an Excel file.")
     parser_plan_to_excel.add_argument("--plan_file", required=True, type=str, help="Path to the input Markdown verification plan file.")
     parser_plan_to_excel.add_argument("--excel_file", required=True, type=str, help="Path for the output Excel file (e.g., generated_outputs/excel_reports/report.xlsx).")
@@ -236,32 +237,55 @@ def main():
     parser_generate_all.add_argument("--output_dir", type=str, default="generated_outputs/unified_generation", help="Directory to save all generated artifacts.")
     parser_generate_all.add_argument("--unified", action="store_true", help="Generate a single unified plan and test suite for all features. If not set, generates artifacts per feature.")
     parser_generate_all.set_defaults(func=handle_generate_all)
-    # --- End of new subparser ---    
-
+    # --- End of new subparser ---
+    
     # --- Add new subparser for UVM verification plan generation ---
     parser_gen_uvm_plan = subparsers.add_parser("gen_uvm_plan", help="Generate a UVM verification plan for an ASIC feature.")
-    parser_gen_uvm_plan.add_argument("feature_description", type=str, help="Description of the ASIC feature to verify with UVM.")
+    parser_gen_uvm_plan.add_argument("--feature", required=True, type=str, help="Description of the ASIC feature to verify with UVM.")
     parser_gen_uvm_plan.add_argument("--spec_file", type=str, help="Optional: Path to the ASIC specification file for additional context.")
     parser_gen_uvm_plan.add_argument("--address_map_file", type=str, help="Optional: Path to the address map file for register-level testing context.")
     parser_gen_uvm_plan.add_argument("--output", type=str, default="generated_outputs/uvm_verification_plans", help="Directory to save the generated UVM verification plan.")
-    parser_gen_uvm_plan.set_defaults(func=handle_gen_uvm_plan)    # --- Add new subparser for UVM test generation ---
+    # Add API configuration arguments
+    parser_gen_uvm_plan.add_argument('--openrouter-key', 
+                              type=str, 
+                              default=os.getenv('OPENROUTER_API_KEY', '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'),
+                              help='OpenRouter API key (default: env var or hardcoded)')
+    parser_gen_uvm_plan.add_argument('--llm-model',
+                              type=str, 
+                              default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
+                              help='LLM model name (default: env var or hardcoded)')
+    parser_gen_uvm_plan.set_defaults(func=handle_gen_uvm_plan)
+      # --- Add new subparser for UVM test generation ---
     parser_gen_uvm_tests = subparsers.add_parser("gen_uvm_tests", help="Generate UVM test files from a verification plan.")
     parser_gen_uvm_tests.add_argument("plan_file", type=str, help="Path to the UVM verification plan file (Markdown format).")
     parser_gen_uvm_tests.add_argument("--output", type=str, default="generated_outputs/uvm_tests", help="Directory to save the generated UVM test files.")
     parser_gen_uvm_tests.add_argument("--coverage_enable", action="store_true", help="Enable comprehensive coverage points in generated UVM tests.")
+    # Add API configuration arguments
+    parser_gen_uvm_tests.add_argument("--openrouter-key", 
+                                    type=str, 
+                                    default=os.getenv('OPENROUTER_API_KEY', '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'),
+                                    help="OpenRouter API key for LLM access.")
+    parser_gen_uvm_tests.add_argument("--llm-model", 
+                                    type=str, 
+                                    default=os.getenv('DEEPSEEK_MODEL_NAME_DEFAULT', 'deepseek/deepseek-chat-v3-0324:free'),
+                                    help="llm model name to use as base model.")
     parser_gen_uvm_tests.set_defaults(func=handle_gen_uvm_tests)
-    # --- End of UVM subparsers ---
-
+    # --- End of UVM subparsers ---    args = parser.parse_args()    
     args = parser.parse_args()
+    
+    # Check if GUI mode is requested
+    if args.gui:
+        launch_gui()
+        return
     
     # Set API configuration from command line arguments for all commands
     if hasattr(args, 'openrouter_key'):
         common_utils.OPENROUTER_API_KEY = args.openrouter_key
         print(f"Using API key: {args.openrouter_key[:20]}..." if args.openrouter_key else "No API key provided")
     
-    if hasattr(args, 'deepseek_model'):
-        common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.deepseek_model
-        print(f"Using model: {args.deepseek_model}")
+    if hasattr(args, 'llm_model'):
+        common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.llm_model
+        print(f"Using model: {args.llm_model}")
     
     # Initialize common utilities only if not doing plan_to_excel,
     # as it doesn't need RAG or LLM calls for that specific task.
@@ -281,19 +305,52 @@ def handle_populate_kb(args):
     populate_knowledge_base() # From scripts.populate_kb
     print("Knowledge Base Population finished.")
 
+def handle_test_connection(args):
+    """Test API connection and authentication."""
+    print("Testing API connection...")
+    try:
+        # Set API configuration from command line arguments
+        common_utils.OPENROUTER_API_KEY = args.openrouter_key
+        common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.llm_model
+        
+        # Import the API call function from common_utils
+        from scripts.common_utils import call_deepseek_api
+        
+        # Test with a simple query
+        test_response = call_deepseek_api(
+            "Hello, please respond with exactly 'API connection successful'", 
+            model_name=args.llm_model,
+            temperature=0.1,
+            max_tokens=50
+        )
+        
+        if test_response and "API connection successful" in test_response:
+            print("[SUCCESS] API Connection Test: SUCCESS")
+            print(f"   Model: {args.llm_model}")
+            print(f"   Response: {test_response}")
+        else:
+            print("[SUCCESS] API Connection Test: SUCCESS (with response)")
+            print(f"   Model: {args.llm_model}")
+            print(f"   Response: {test_response}")
+            
+    except Exception as e:
+        print("[FAILED] API Connection Test: FAILED")
+        print(f"   Error: {str(e)}")
+        raise e
+
 def handle_gen_plan(args):
     # Set API configuration from command line arguments
     if hasattr(args, 'openrouter_key'):
         common_utils.OPENROUTER_API_KEY = args.openrouter_key
         print(f"Using API key: {args.openrouter_key[:20]}..." if args.openrouter_key else "No API key provided")
     
-    if hasattr(args, 'deepseek_model'):
-        common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.deepseek_model
-        print(f"Using model: {args.deepseek_model}")
+    if hasattr(args, 'llm_model'):
+        common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.llm_model
+        print(f"Using model: {args.llm_model}")
     
-    print(f"Starting Verification Plan Generation for feature: {args.feature_description}")
+    print(f"Starting Verification Plan Generation for feature: {args.feature}")
     generate_verification_plan( # From scripts.generate_verif_plan
-        feature_description=args.feature_description
+        feature_description=args.feature
         # asic_spec_file_path=args.spec_file,
         # address_map_file_path=args.addr_map_file
     )
@@ -308,9 +365,9 @@ def handle_gen_tests(args):
     if hasattr(args, 'openrouter_key'):
         common_utils.OPENROUTER_API_KEY = args.openrouter_key
         print(f"Using API key: {args.openrouter_key[:20]}..." if args.openrouter_key else "No API key provided")
-    if hasattr(args, 'deepseek_model'):
-        common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.deepseek_model
-        print(f"Using model: {args.deepseek_model}")
+    if hasattr(args, 'llm_model'):
+        common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.llm_model
+        print(f"Using model: {args.llm_model}")
     
     print("Starting C Test Generation...")
     plan_file_path = Path(args.plan_file)
@@ -415,10 +472,9 @@ def handle_generate_comprehensive(args):
     print("=" * 60)
     print("COMPREHENSIVE VERIFICATION GENERATION")
     print("=" * 60)
-    
-    # Set API configuration
+      # Set API configuration
     common_utils.OPENROUTER_API_KEY = args.openrouter_key
-    common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.deepseek_model
+    common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.llm_model
     
     print(f"Processing specification files: {', '.join(args.spec_files)}")
     if args.hal_file:
@@ -649,9 +705,9 @@ def handle_gen_uvm_plan(args):
     """Handle UVM verification plan generation command."""
     print("DEBUG: handle_gen_uvm_plan called")
     common_utils.OPENROUTER_API_KEY = args.openrouter_key
-    common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.deepseek_model
+    common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.llm_model
     
-    print(f"Generating UVM verification plan for: {args.feature_description}")
+    print(f"Generating UVM verification plan for: {args.feature}")
     
     # Read optional context files
     spec_text = None
@@ -679,12 +735,12 @@ def handle_gen_uvm_plan(args):
         # Initialize automator
         automator = ASICVerificationAutomator(
             api_key=args.openrouter_key,
-            model_name=args.deepseek_model
+            model_name=args.llm_model
         )
         
         # Generate UVM verification plan
         verification_plan = automator.generate_uvm_verification_plan(
-            feature_description=args.feature_description,
+            feature_description=args.feature,
             spec_text=spec_text,
             address_map_text=address_map_text
         )
@@ -693,14 +749,14 @@ def handle_gen_uvm_plan(args):
         os.makedirs(args.output, exist_ok=True)
         
         # Generate filename
-        safe_feature_name = "".join(c if c.isalnum() or c in "_-" else "_" for c in args.feature_description)
+        safe_feature_name = "".join(c if c.isalnum() or c in "_-" else "_" for c in args.feature)
         safe_feature_name = safe_feature_name[:50]  # Limit length
         filename = f"uvm_verif_plan_{safe_feature_name}.md"
         output_path = os.path.join(args.output, filename)
         
         # Save the verification plan
         with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(f"# UVM Verification Plan: {args.feature_description}\n\n")
+            f.write(f"# UVM Verification Plan: {args.feature}\n\n")
             f.write(f"**Generated on:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
             f.write("---\n\n")
             f.write(verification_plan)
@@ -714,7 +770,7 @@ def handle_gen_uvm_plan(args):
 def handle_gen_uvm_tests(args):
     """Handle UVM test generation command."""
     common_utils.OPENROUTER_API_KEY = args.openrouter_key
-    common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.deepseek_model
+    common_utils.DEEPSEEK_MODEL_NAME_DEFAULT = args.llm_model
     
     print(f"Generating UVM tests from plan: {args.plan_file}")
     if args.coverage_enable:
@@ -730,11 +786,10 @@ def handle_gen_uvm_tests(args):
     try:
         from scripts.automator import ASICVerificationAutomator
         from pathlib import Path
-        
-        # Initialize automator
+          # Initialize automator
         automator = ASICVerificationAutomator(
             api_key=args.openrouter_key,
-            model_name=args.deepseek_model
+            model_name=args.llm_model
         )
           # Read verification plan
         with open(args.plan_file, 'r', encoding='utf-8') as f:

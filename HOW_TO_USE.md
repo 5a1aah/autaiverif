@@ -1,5 +1,27 @@
 # How to Run This Project
 
+## Two Usage Modes Available
+
+This project supports both **GUI Mode** (graphical user interface) and **CLI Mode** (command line interface):
+
+### 🖥️ GUI Mode (Recommended for Interactive Use)
+Launch the graphical interface for easy, interactive verification automation:
+
+```sh
+python main_orchestrator.py --gui
+```
+
+The GUI provides:
+- **Knowledge Base Management**: Populate and manage verification knowledge base
+- **Verification Plan Generation**: Interactive feature description and plan generation  
+- **UVM Test Generation**: Generate UVM tests with coverage options
+- **C Test Generation**: Generate C tests from verification plans
+- **File Management**: Easy file selection and output directory management
+- **Real-time Progress**: Live status updates and error handling
+
+### 💻 CLI Mode (Recommended for Batch Processing)
+Use command-line interface for automation, scripting, and batch operations:
+
 1. **Clone the Repository**
     ```sh
     git clone <repository-url>
@@ -9,13 +31,11 @@
 2. **Install Dependencies**
     ```sh
     # Activate Virtual Environment (Recommended)
-    ```sh
     # On Windows
     venv\Scripts\activate
 
     # On macOS/Linux
     source venv/bin/activate
-    ```
 
     pip install -r requirements.txt
     ```
@@ -28,8 +48,6 @@
 
     python main_orchestrator.py populate_kb           
     ```
-    python main_orchestrator.py gen_plan --feature_description "CLINT timer interrupt"
-
     python main_orchestrator.py gen_plan "CLINT timer interrupt"
 
     ```
@@ -122,7 +140,7 @@ python main_orchestrator.py gen_uvm_plan "Multi-level cache coherency with MESI 
 python main_orchestrator.py gen_uvm_plan "PCIe Gen4 x16 interface verification with error injection"
 
 # Generate verification plan for security features
-python main_orthodbrator.py gen_uvm_plan "Memory protection unit verification with privilege level checking"
+python main_orchestrator.py gen_uvm_plan "Memory protection unit verification with privilege level checking"
 
 # Generate verification plan for performance testing
 python main_orchestrator.py gen_uvm_plan "DMA controller verification with concurrent multi-channel operations"
@@ -134,3 +152,5 @@ python main_orchestrator.py gen_uvm_plan "DMA controller verification with concu
 
 
 > Replace `<repository-url>` with the actual URL of the repository.
+
+gen_plan "PLIC registers access" --deepseek-model(--llm-model) "deepseek/deepseek-chat-v3-0324:free"

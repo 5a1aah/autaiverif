@@ -7,10 +7,10 @@ from pathlib import Path
 import time
 
 # --- OpenRouter API Configuration ---
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "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") # IMPORTANT: Replace with your key or set ENV VAR
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "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") # IMPORTANT: Replace with your key or set ENV VAR
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_MODEL_NAME = "deepseek/deepseek-coder" # Or your preferred DeepSeek V2 model - DEPRECATED
-DEEPSEEK_MODEL_NAME_DEFAULT = os.getenv("DEEPSEEK_MODEL_NAME_DEFAULT", "deepseek/deepseek-chat-v3-0324:free") # Updated default model
+DEEPSEEK_MODEL_NAME = "deepseek/deepseek-coder" # DeepSeek V2 model - DEPRECATED
+DEEPSEEK_MODEL_NAME_DEFAULT = os.getenv("DEEPSEEK_MODEL_NAME_DEFAULT", "deepseek/deepseek-chat-v3-0324:free") # Default model
 
 # --- Embedding Model and ChromaDB Configuration ---
 EMBEDDING_MODEL_NAME = 'all-MiniLM-L6-v2' # Small and fast, good for general purpose

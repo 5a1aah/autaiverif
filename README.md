@@ -15,16 +15,13 @@ The goal is to accelerate the verification process, assist engineers in drafting
 * **Automated C Test Code Generation:** Generates C test functions using specific HAL details and referencing provided C test examples for style and structure.
 * **Individual Test Regeneration:** Ability to regenerate specific test cases without regenerating the entire test suite.
 * **PDF to Markdown Conversion:** Automatically converts PDF specifications to markdown format for knowledge base integration.
-* **Feature Extraction from Specifications:** Automatically extracts design features from ASIC specification documents with categorization and priority assignment.
-* **Comprehensive Verification Generation:** End-to-end automation that extracts features, generates verification plans, creates test files, and produces Excel reports for all features in one command.
+* **🆕 AI Vision Analysis:** Enhanced PDF processing that analyzes technical diagrams, block diagrams, timing charts, and register layouts using vision-capable LLM models.
 
 ### Quality Assurance Features
 * **Automatic Format Validation:** Validates verification plans and C tests for correct format and structure.
 * **Intelligent Regeneration:** Automatically regenerates incorrectly formatted verification plans with enhanced prompts.
 * **Error Handling and Recovery:** Robust error handling with graceful fallback mechanisms.
 * **Validation Reports:** Detailed feedback on plan validity, warnings, and suggestions for improvement.
-* **Multi-Format Output:** Supports JSON, CSV, and human-readable text formats for extracted features.
-* **Comprehensive Reporting:** Generates detailed summary reports with statistics and categorization of all generated artifacts.
 
 ### Technical Features
 * **Retrieval Augmented Generation (RAG):** Utilizes a local vector database (ChromaDB) to retrieve relevant information from your ASIC specifications, HAL documentation, register maps, and C test examples.
@@ -32,9 +29,6 @@ The goal is to accelerate the verification process, assist engineers in drafting
 * **Configurable Prompts:** Allows customization of prompts used to interact with the LLM for both stages.
 * **Modular Architecture:** Organized into separate Python scripts for each major task with clear separation of concerns.
 * **Enhanced Token Limits:** Optimized token allocation for better generation quality (4096 tokens for complex operations).
-* **Intelligent Feature Extraction:** Advanced algorithms to automatically identify and categorize design features from specification documents.
-* **Batch Processing:** Efficient processing of multiple features with parallel execution and progress tracking.
-* **Flexible Output Modes:** Support for both unified verification plans (single comprehensive plan) and individual feature-specific plans.
 
 ## Project Structure
 asic_verification_automation/
@@ -46,19 +40,13 @@ asic_verification_automation/
 ├── vector_db/                # Persistent storage for ChromaDB (created automatically)
 ├── generated_outputs/
 │   ├── verification_plans/   # Output: Generated verification plans
-│   ├── c_tests/              # Output: Generated C test files
-│   ├── excel_reports/        # Output: Excel format verification reports
-│   ├── extracted_features/   # Output: Extracted features in JSON/CSV/text formats
-│   └── comprehensive_verification/ # Output: Complete verification artifacts
+│   └── c_tests/              # Output: Generated C test files
 ├── scripts/
 │   ├── 01_populate_kb.py     # Processes docs and builds the vector DB
 │   ├── 02_generate_verif_plan.py # Generates verification plans
 │   ├── 03_generate_c_tests.py    # Generates C tests
-│   ├── feature_extractor.py  # Extracts features from specifications
-│   ├── batch_processor.py    # Batch processing utilities
-│   ├── unified_generator.py  # Unified verification generation
 │   ├── common_utils.py       # Helper functions (API calls, RAG retrieval, etc.)
-│   └── __init__.py           # Makes 'scripts' a package
+│   └── init.py           # Makes 'scripts' a package
 ├── prompts/                  # Prompt templates for the LLM
 │   ├── stage1_verif_plan_prompt.txt
 │   └── stage2_c_test_gen_prompt.txt
@@ -78,8 +66,8 @@ These are listed in `requirements.txt` and can be installed using `pip`:
 * `sentence-transformers` - Text embeddings for RAG
 * `chromadb` - Vector database for knowledge storage
 * `pandas` - Data manipulation for Excel reports
-* `openpyxl` - Excel file generation
-* `PyMuPDF>=1.23.0` - PDF processing and text extraction
+* `PyMuPDF` - PDF processing and text extraction
+* `Pillow` - Image processing for vision analysis
 
 ### API Key
 * An **OpenRouter API Key** is required to use the LLM (e.g., DeepSeek V3). You can get one from [OpenRouter.ai](https://openrouter.ai/).
@@ -107,61 +95,28 @@ txt
 ```
 ### 4. Configure OpenRouter API Key
 
-The system now supports multiple ways to configure your API key and model settings:
+You can set the API key in multiple ways with the following priority order:
 
-#### Method 1: Environment Variables (Recommended)
-Set environment variables for global configuration:
-
-**Windows PowerShell:**
-```powershell
-$env:OPENROUTER_API_KEY = "sk-or-v1-your-actual-api-key-here"
-$env:DEEPSEEK_MODEL_NAME_DEFAULT = "deepseek/deepseek-chat-v3-0324:free"
-```
-
-**Linux/macOS:**
+**Method 1: Command Line Arguments (Recommended for commands)**
 ```bash
-export OPENROUTER_API_KEY="sk-or-v1-your-actual-api-key-here"
-export DEEPSEEK_MODEL_NAME_DEFAULT="deepseek/deepseek-chat-v3-0324:free"
+# Set API key directly when running commands
+python main_orchestrator.py gen_plan --openrouter-key "your_api_key" --feature "timer interrupts"
+python main_orchestrator.py gen_tests --openrouter-key "your_api_key" --plan_file "path/to/plan.md"
 ```
 
-**Windows Command Prompt:**
-```cmd
-set OPENROUTER_API_KEY=sk-or-v1-your-actual-api-key-here
-set DEEPSEEK_MODEL_NAME_DEFAULT=deepseek/deepseek-chat-v3-0324:free
+**Method 2: Environment Variable**
+Set an environment variable named `OPENROUTER_API_KEY`:
+- Linux/macOS: `export OPENROUTER_API_KEY="your_actual_api_key"`
+- Windows (PowerShell): `$env:OPENROUTER_API_KEY="your_actual_api_key"`
+- Windows (Command Prompt): `set OPENROUTER_API_KEY=your_actual_api_key`
+
+**Method 3: Direct Configuration**
+Edit `scripts/common_utils.py` and update the API key:
+
 ```
-
-#### Method 2: Command Line Arguments (Per-Command Basis)
-All commands now support API key configuration via command line arguments:
-
-```bash
-# Using API key arguments for plan generation
-python main_orchestrator.py gen_plan "test feature" --openrouter-key "sk-or-v1-your-key" --deepseek-model "deepseek/deepseek-chat-v3-0324:free"
-
-# Using API key arguments for test generation
-python main_orchestrator.py gen_tests --plan_file "path/to/plan.md" --openrouter-key "sk-or-v1-your-key" --deepseek-model "deepseek/deepseek-chat-v3-0324:free"
+OPENROUTER_API_KEY = 
+"your_actual_api_key_here"
 ```
-
-#### Method 3: Global Arguments (For All Subcommands)
-You can also specify API configuration at the top level:
-
-```bash
-python main_orchestrator.py --openrouter-key "sk-or-v1-your-key" --deepseek-model "deepseek/deepseek-chat-v3-0324:free" gen_plan "test feature"
-```
-
-#### Method 4: Direct Configuration (Fallback)
-Edit `scripts/common_utils.py` and update the API key (not recommended for production):
-
-```python
-OPENROUTER_API_KEY = "sk-or-v1-your-actual-api-key-here"
-DEEPSEEK_MODEL_NAME_DEFAULT = "deepseek/deepseek-chat-v3-0324:free"
-```
-
-#### Priority Order
-The system resolves API configuration in the following priority order:
-1. Command line arguments (`--openrouter-key`, `--deepseek-model`)
-2. Environment variables (`OPENROUTER_API_KEY`, `DEEPSEEK_MODEL_NAME_DEFAULT`)
-3. Hardcoded defaults in `common_utils.py`
-
 ### 5. Populate the Knowledge Base
 This is a critical step for quality output. The system supports multiple document formats:
  Supported File Formats
@@ -279,6 +234,29 @@ PDF files are automatically processed during knowledge base population:
 ```
 python scripts/populate_kb.py
 ```
+### 🆕 Enhanced PDF Processing with Vision Analysis
+
+The system now supports AI-powered analysis of technical diagrams in PDF specifications:
+
+**Vision Analysis Features:**
+- **Block Diagrams:** Analyzes system architecture and component relationships
+- **Timing Charts:** Extracts timing relationships and signal dependencies  
+- **Register Layouts:** Identifies bit fields, memory maps, and address spaces
+- **State Machines:** Understands state transitions and control flow
+- **Pin Diagrams:** Recognizes interconnections and bus structures
+- **Technical Specifications:** Reads numerical values and parameters from images
+
+**Usage with Vision Analysis:**
+```bash
+# Convert single PDF with AI vision analysis
+python convert_pdfs.py knowledge_base_src/specs/specification.pdf --vision
+
+# Convert all PDFs in directory with vision analysis
+python convert_pdfs.py knowledge_base_src/specs/ --vision
+```
+
+Vision analysis uses advanced models like Claude 3.5 Sonnet, GPT-4o, and Gemini Pro Vision to provide detailed technical descriptions that are integrated into the markdown output, significantly enhancing the context available for verification planning.
+
 ### Advanced Usage Custom Prompt Templates
 Modify prompt templates in the prompts/ directory:
 
@@ -355,43 +333,3 @@ python scripts/populate_kb.py
 - "ChromaDB collection not initialized": Run populate_kb.py first
 - "API request failed": Check API key and internet connection
 - "Validation failed": Review generated content format
-
-## Recent Updates and Improvements
-
-### API Key Configuration Enhancement (Latest Update)
-- **Enhanced Command Line Support**: All commands now support `--openrouter-key` and `--deepseek-model` arguments
-- **Multiple Configuration Methods**: Support for environment variables, command line arguments, and global arguments
-- **Priority-Based Resolution**: Clear priority order for API configuration resolution
-- **Improved Error Handling**: Better feedback when API keys are missing or invalid
-
-### Updated Command Structure
-The following commands have been updated with new API key support:
-
-#### 1. Generate Verification Plan (Updated)
-```bash
-# Using environment variables
-python main_orchestrator.py gen_plan "CLINT machine level timer interrupts"
-
-# Using command line arguments
-python main_orchestrator.py gen_plan "CLINT machine level timer interrupts" --openrouter-key "sk-or-v1-your-key" --deepseek-model "deepseek/deepseek-chat-v3-0324:free"
-
-# Using global arguments
-python main_orchestrator.py --openrouter-key "sk-or-v1-your-key" gen_plan "CLINT machine level timer interrupts"
-```
-
-#### 2. Generate C Tests from Plan (Updated)
-```bash
-# Using environment variables
-python main_orchestrator.py gen_tests --plan_file "generated_outputs/verification_plans/verif_plan_CLINT_machine_level_timer_interrupts.md"
-
-# Using command line arguments  
-python main_orchestrator.py gen_tests --plan_file "generated_outputs/verification_plans/verif_plan_CLINT_machine_level_timer_interrupts.md" --openrouter-key "sk-or-v1-your-key" --deepseek-model "deepseek/deepseek-chat-v3-0324:free"
-```
-
-#### 3. Other Available Commands
-All other commands remain unchanged:
-- `populate_kb` - Process source documents and populate the RAG knowledge base
-- `plan_to_excel` - Convert a Markdown verification plan to an Excel file
-- `extract_features` - Extract design features from specification documents
-- `generate_comprehensive` - Extract features and generate comprehensive verification plans and tests
-- `generate_all` - Generate all verification artifacts (plan, tests, Excel) for features

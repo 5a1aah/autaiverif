@@ -1111,9 +1111,8 @@ asic_verification_automation/
 │   ├── uvm_tests/            # Generated UVM test files
 │   └── excel_reports/        # Excel format reports
 ├── scripts/                  # Core agent scripts
-├── prompts/                  # Prompt templates
 ├── vector_db/                # Database
-└── gui_app.py               # This GUI application
+└── gui_app.py                # This GUI application
 
 Usage Instructions:
 1. Configure API key in Setup tab
